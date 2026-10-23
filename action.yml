@@ -63,6 +63,9 @@ inputs:
   rules:
     description: Extra rule files or folders (YAML), one per line, inside the repository. Added to the built-in rules.
     required: false
+  crds:
+    description: CustomResourceDefinition files or folders (YAML), one per line, inside the repository. Custom resources of those kinds are checked against their schema.
+    required: false
   disable-rules:
     description: Rule ids to turn off, separated by commas or new lines.
     required: false

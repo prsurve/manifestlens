@@ -103,6 +103,17 @@ export interface UncheckedDocument {
   message: string;
 }
 
+/** A finding whose rule has no automatic fix: the user has to change it by hand. */
+export interface UnfixedFinding {
+  ruleId: string;
+  severity: Severity;
+  message: string;
+  /** 1-based line the finding points at. */
+  line: number;
+  kind?: string;
+  name?: string;
+}
+
 export type FixStatus = 'unchanged' | 'fixed' | 'rejected';
 
 export interface FixResult {
@@ -116,6 +127,8 @@ export interface FixResult {
   skipped: SkippedFix[];
   /** Findings from rules that have no structured fix (nothing is ever done about these). */
   withoutFix: number;
+  /** Those findings themselves, so a typo in a custom resource is shown, not just counted. */
+  unfixed: UnfixedFinding[];
   /** Documents of a kind no rule covers: nothing was checked or fixed there. */
   notChecked: UncheckedDocument[];
   /** Findings still present in `fixed`. */

@@ -1,5 +1,5 @@
 import { isAlias, isMap, isScalar, isSeq, stringify } from 'yaml';
-import type { Alias, Pair, YAMLMap } from 'yaml';
+import type { Alias, Pair, Scalar, YAMLMap } from 'yaml';
 import { parseManifestWithTree } from '../parse.js';
 
 /** One step down a path: a mapping key, or a list index. */
@@ -86,6 +86,45 @@ export function setInSource(
     node = child;
   }
   return unsupported('empty path');
+}
+
+/**
+ * Rename a mapping key in one document, touching only the key's own text. The mapping is found by
+ * `steps`; quoting of the key is kept. Refuses when the key is not written in that mapping itself
+ * (for example it comes in through a YAML merge) or the new name is already there.
+ */
+export function renameKeyInSource(
+  source: string,
+  documentIndex: number,
+  steps: Step[],
+  from: string,
+  to: string,
+): EditResult {
+  const tree = parseManifestWithTree(source)[documentIndex]?.tree;
+  if (!tree) return unsupported('the document is no longer there');
+  let node: unknown = tree.contents;
+  for (const step of steps) {
+    if (isAlias(node)) return unsupported('a YAML alias is on the path');
+    if (typeof step === 'number') {
+      if (!isSeq(node)) return unsupported('expected a list on the path');
+      node = node.items[step];
+    } else {
+      if (!isMap(node)) return unsupported(`expected a mapping at "${step}"`);
+      node = node.items.find((p) => isScalar(p.key) && String(p.key.value) === step)?.value;
+    }
+    if (node === undefined) return unsupported('the path does not exist');
+  }
+  if (!isMap(node)) return unsupported('the parent is not a mapping');
+  const keys = node.items
+    .filter((p) => isScalar(p.key))
+    .map((p) => String((p.key as Scalar).value));
+  if (keys.includes(to)) return unsupported(`"${to}" already exists there`);
+  const pair = node.items.find((p) => isScalar(p.key) && String(p.key.value) === from);
+  const range = pair && isScalar(pair.key) ? pair.key.range : undefined;
+  if (!range) return unsupported('cannot locate the key');
+  const old = source.slice(range[0], range[1]);
+  const quote = old.startsWith('"') || old.startsWith("'") ? old[0] : '';
+  return ok(source, range[0], range[1], `${quote}${to}${quote}`);
 }
 
 function isEmpty(node: unknown): boolean {

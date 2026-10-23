@@ -45,7 +45,7 @@ export function formatFixReport(
     for (const f of result.validation.introduced) out.push(`  would add ${f.ruleId}: ${f.message}`);
   } else if (n === 0) {
     out.push(
-      `${file}: no fixes to apply${result.notChecked.length > 0 ? ', but not everything was checked' : ''}.`,
+      `${file}: no fixes to apply${result.unfixed.length > 0 ? ', but some findings need a manual fix' : result.notChecked.length > 0 ? ', but not everything was checked' : ''}.`,
     );
   } else if (mode === 'preview') {
     out.push(`${file}: ${n} fix${n === 1 ? '' : 'es'} ready (preview, nothing written).`);
@@ -68,6 +68,12 @@ export function formatFixReport(
       '',
       `Validation passed: the YAML parses, only the fields above changed, ${result.validation.resolved} finding${result.validation.resolved === 1 ? ' is' : 's are'} gone and none were added.`,
     );
+  }
+  if (result.unfixed.length > 0) {
+    out.push('', 'Needs a manual fix:');
+    for (const f of result.unfixed) {
+      out.push(`  line ${f.line}  ${f.severity.toUpperCase()}  ${f.ruleId}  ${f.message}`);
+    }
   }
   for (const d of result.notChecked) out.push('', ...coverageLines(where(d), d.line, d));
   const notes: string[] = [];

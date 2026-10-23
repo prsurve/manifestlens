@@ -13,6 +13,7 @@ import {
   RuleError,
   loadBundledRules,
   parseFixPolicy,
+  parseCrds,
   parseRules,
 } from '@manifestlens/core';
 import type { FixPolicy, Rule } from '@manifestlens/core';
@@ -170,6 +171,7 @@ function warnIfUntrusted(s: Settings, configPath: string | null): void {
   const sources = [
     configPath ? `the config file (${configPath})` : '',
     s.rules.length > 0 ? 'custom rules' : '',
+    s.crds.length > 0 ? 'custom resource definitions' : '',
     s.fixPolicy !== '' ? 'the fix policy' : '',
   ].filter(Boolean);
   if (sources.length === 0) return;
@@ -191,32 +193,38 @@ function logConfiguration(s: Settings, configPath: string | null): void {
   core.endGroup();
 }
 
-/** Read extra rule files, keeping them inside the repository and their ids unique. */
+/** Read extra rule and CRD files, keeping them inside the repository and their ids unique. */
 function loadRules(workspace: string, s: Settings): Rule[] {
   const rules = loadBundledRules();
   const root = realpathSync(workspace);
-  for (const path of s.rules) {
-    const abs = join(workspace, path);
-    let real: string;
-    try {
-      real = realpathSync(abs);
-    } catch {
-      throw new ConfigError([`rules: "${path}" does not exist.`]);
-    }
-    if (real !== root && !real.startsWith(root + sep))
-      throw new ConfigError([`rules: "${path}" points outside the repository.`]);
-    const files = statSync(real).isDirectory()
-      ? readdirSync(real)
-          .filter((f) => /\.ya?ml$/.test(f))
-          .sort()
-          .map((f) => join(real, f))
-      : [real];
-    for (const file of files) {
+  const sources: [string, string[], (text: string, origin: string) => Rule[]][] = [
+    ['rules', s.rules, parseRules],
+    ['crds', s.crds, parseCrds],
+  ];
+  for (const [setting, paths, parse] of sources) {
+    for (const path of paths) {
+      const abs = join(workspace, path);
+      let real: string;
       try {
-        rules.push(...parseRules(readFileSync(file, 'utf8'), file.slice(root.length + 1)));
-      } catch (err) {
-        if (err instanceof RuleError) throw new ConfigError([err.message]);
-        throw err;
+        real = realpathSync(abs);
+      } catch {
+        throw new ConfigError([`${setting}: "${path}" does not exist.`]);
+      }
+      if (real !== root && !real.startsWith(root + sep))
+        throw new ConfigError([`${setting}: "${path}" points outside the repository.`]);
+      const files = statSync(real).isDirectory()
+        ? readdirSync(real)
+            .filter((f) => /\.ya?ml$/.test(f))
+            .sort()
+            .map((f) => join(real, f))
+        : [real];
+      for (const file of files) {
+        try {
+          rules.push(...parse(readFileSync(file, 'utf8'), file.slice(root.length + 1)));
+        } catch (err) {
+          if (err instanceof RuleError) throw new ConfigError([err.message]);
+          throw err;
+        }
       }
     }
   }

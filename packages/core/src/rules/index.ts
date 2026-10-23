@@ -4,9 +4,12 @@ import type { Rule } from './types.js';
 
 export { checkManifest } from './check.js';
 export { checkedKinds, kindCoverage } from './coverage.js';
+export { parseCrds } from './crd.js';
 export { RuleError, parseRules } from './load.js';
 export type {
   CheckResult,
+  CrdInfo,
+  CrdSchema,
   CheckedDocument,
   Coverage,
   Finding,

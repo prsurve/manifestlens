@@ -480,9 +480,11 @@ export function renderFix(result: FixResult, diff: string, actions: FixActions =
         el('p', {
           class: 'summary',
           text:
-            result.notChecked.length > 0
-              ? `No fixes to apply, and ${plural(result.notChecked.length, 'document')} not checked.`
-              : 'No fixes to apply.',
+            result.unfixed.length > 0
+              ? `No fixes to apply, but ${plural(result.unfixed.length, 'finding')} need a manual fix.`
+              : result.notChecked.length > 0
+                ? `No fixes to apply, and ${plural(result.notChecked.length, 'document')} not checked.`
+                : 'No fixes to apply.',
         }),
         actions.undo ? button('Undo last apply', actions.undo) : false,
       ),
@@ -523,6 +525,21 @@ export function renderFix(result: FixResult, diff: string, actions: FixActions =
             ...a.changes.map((c) =>
               el('p', { class: 'meta', text: `${c.path}: ${c.before} -> ${c.after}` }),
             ),
+          ]),
+        ),
+      ]),
+    );
+  }
+  if (result.unfixed.length > 0) {
+    root.append(
+      el('section', { class: 'doc' }, [
+        el('h2', { text: 'Needs a manual fix' }),
+        ...result.unfixed.map((f) =>
+          el('p', { class: `issue sev-${f.severity}` }, [
+            el('span', { class: 'badge', text: f.severity }),
+            ` ${f.ruleId} `,
+            ...at(f.line),
+            el('span', { text: ` ${f.message}` }),
           ]),
         ),
       ]),

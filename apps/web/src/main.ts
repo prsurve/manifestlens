@@ -7,12 +7,14 @@ import {
   fixManifest,
   loadBundledRules,
   parseFixPolicy,
+  parseCrds,
   parseRules,
   unifiedDiff,
 } from '@manifestlens/core';
 import type { FixPolicy, FixRisk, Rule } from '@manifestlens/core';
 import { inject } from '@vercel/analytics';
 import './style.css';
+import { fetchCrdText, toRawUrl } from './crd-url.js';
 import { examples, fixExamples } from './examples.js';
 import { initTheme } from './theme.js';
 import {
@@ -39,23 +41,36 @@ inject();
 
 const bundled = loadBundledRules();
 
-/** Bundled rules plus any the user pasted. Shows the error and falls back to bundled on bad rules. */
+/** Show a message under a text box, or hide the box's error line when there is none. */
+function setError(id: string, message: string | undefined): void {
+  const el = $(id);
+  el.hidden = message === undefined;
+  el.textContent = message ?? '';
+}
+
+/**
+ * Bundled rules plus any the user pasted, and the schemas of any pasted CustomResourceDefinitions.
+ * Shows the error under the box that caused it and leaves that box's contribution out.
+ */
 function currentRules(): Rule[] {
-  const text = input('extra-rules').value;
-  const error = $('rules-error');
-  error.hidden = true;
-  if (text.trim() === '') return bundled;
-  try {
-    const extra = parseRules(text, 'your rules');
-    const ids = new Set(bundled.map((r) => r.id));
-    const clash = extra.find((r) => ids.has(r.id));
-    if (clash) throw new RuleError(`Rule id "${clash.id}" is already used by a built-in rule.`);
-    return [...bundled, ...extra];
-  } catch (err) {
-    error.textContent = err instanceof Error ? err.message : String(err);
-    error.hidden = false;
-    return bundled;
-  }
+  const rules = [...bundled];
+  const ids = new Set(rules.map((r) => r.id));
+  const add = (boxId: string, errorId: string, parse: () => Rule[]): void => {
+    setError(errorId, undefined);
+    if (input(boxId).value.trim() === '') return;
+    try {
+      const extra = parse();
+      const clash = extra.find((r) => ids.has(r.id));
+      if (clash) throw new RuleError(`Rule id "${clash.id}" is already used by a built-in rule.`);
+      for (const r of extra) ids.add(r.id);
+      rules.push(...extra);
+    } catch (err) {
+      setError(errorId, err instanceof Error ? err.message : String(err));
+    }
+  };
+  add('extra-rules', 'rules-error', () => parseRules(input('extra-rules').value, 'your rules'));
+  add('extra-crds', 'crds-error', () => parseCrds(input('extra-crds').value, 'your CRDs'));
+  return rules;
 }
 
 /** Select a line of a text box and bring it into view, so a result row can point at its source. */
@@ -66,8 +81,55 @@ function selectLine(box: HTMLTextAreaElement, line: number): void {
   const end = start + (lines[line - 1]?.length ?? 0);
   box.focus({ preventScroll: true });
   box.setSelectionRange(start, end);
-  const lineHeight = Number.parseFloat(getComputedStyle(box).lineHeight) || 18;
-  box.scrollTop = Math.max(0, (line - 1) * lineHeight - box.clientHeight / 2);
+  box.scrollTop = Math.max(0, textTop(box, start) - box.clientHeight / 2);
+}
+
+/**
+ * Pixel offset of the text at `index` from the top of a text box's content. Long lines wrap into
+ * several rows, so counting lines times line height lands in the wrong place; instead lay the text
+ * out in a hidden copy of the box and measure it.
+ */
+function textTop(box: HTMLTextAreaElement, index: number): number {
+  const style = getComputedStyle(box);
+  const mirror = document.createElement('div');
+  for (const prop of [
+    'boxSizing',
+    'width',
+    'paddingTop',
+    'paddingRight',
+    'paddingBottom',
+    'paddingLeft',
+    'borderTopWidth',
+    'borderRightWidth',
+    'borderBottomWidth',
+    'borderLeftWidth',
+    'fontFamily',
+    'fontSize',
+    'fontWeight',
+    'lineHeight',
+    'letterSpacing',
+    'tabSize',
+    'whiteSpace',
+    'overflowWrap',
+    'wordBreak',
+  ] as const) {
+    mirror.style[prop] = style[prop];
+  }
+  mirror.style.position = 'absolute';
+  mirror.style.visibility = 'hidden';
+  mirror.style.top = '0';
+  mirror.style.left = '-9999px';
+  // A scrollbar narrows the text area of the real box, so the copy must be as narrow.
+  mirror.style.width = `${box.clientWidth + (Number.parseFloat(style.borderLeftWidth) || 0) + (Number.parseFloat(style.borderRightWidth) || 0)}px`;
+  mirror.style.boxSizing = 'border-box';
+  mirror.textContent = box.value.slice(0, index);
+  const marker = document.createElement('span');
+  marker.textContent = '\u200b';
+  mirror.append(marker);
+  document.body.append(mirror);
+  const top = marker.offsetTop;
+  mirror.remove();
+  return top;
 }
 
 const jumpers: Record<Tab, (target: JumpTarget, line: number) => void> = {
@@ -114,7 +176,7 @@ function update(tab: Tab): void {
     const out = $('explain-output');
     if (source.trim() === '')
       return show(out, renderMessage('Paste a manifest to see it explained, line by line.'));
-    const result = explainManifest(source);
+    const result = explainManifest(source, currentRules());
     show(
       out,
       result.documents.length
@@ -206,15 +268,44 @@ function debounce(fn: () => void, ms: number): () => void {
   };
 }
 
+/** Fetch the CRD at the typed URL into the CRD box, or show why that was not possible. */
+async function loadCrdFromUrl(): Promise<void> {
+  const raw = input('crd-url').value;
+  const url = toRawUrl(raw);
+  if (!url) {
+    setError(
+      'crds-error',
+      raw.trim() === ''
+        ? 'Enter a GitHub link to a CRD file.'
+        : 'Only GitHub links work here (github.com or raw.githubusercontent.com, over https). Paste the YAML instead.',
+    );
+    return;
+  }
+  const button = $<HTMLButtonElement>('crd-load');
+  button.disabled = true;
+  try {
+    input('extra-crds').value = await fetchCrdText(url);
+    setError('crds-error', undefined);
+  } catch (err) {
+    setError('crds-error', err instanceof Error ? err.message : String(err));
+  } finally {
+    button.disabled = false;
+  }
+}
+
 function init(): void {
   initTheme($('theme-toggle'));
   const refresh = debounce(() => update(active), 150);
+  $('crd-load').addEventListener('click', () => {
+    void loadCrdFromUrl().then(() => update(active));
+  });
   for (const id of [
     'explain-input',
     'check-input',
     'diff-old',
     'diff-new',
     'extra-rules',
+    'extra-crds',
     'fix-input',
     'fix-policy',
   ]) {

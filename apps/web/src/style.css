@@ -692,6 +692,22 @@ ins {
   min-height: 120px;
   height: 120px;
 }
+.url-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+.url-row input {
+  flex: 1;
+  min-width: 0;
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: inherit;
+  font: inherit;
+  font-size: 0.85rem;
+}
 .hint {
   margin: 0 0 6px;
   color: var(--muted);

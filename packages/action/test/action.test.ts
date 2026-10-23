@@ -321,6 +321,39 @@ describe('extra rules', () => {
     expect(dir.outputs.errors).toBe('2');
   });
 
+  it('checks custom resources against CRDs from the repository', async () => {
+    const crd = [
+      'apiVersion: apiextensions.k8s.io/v1',
+      'kind: CustomResourceDefinition',
+      'spec:',
+      '  group: example.com',
+      '  names: { kind: Widget }',
+      '  versions:',
+      '    - name: v1',
+      '      schema:',
+      '        openAPIV3Schema:',
+      '          type: object',
+      '          properties:',
+      '            spec:',
+      '              type: object',
+      '              properties:',
+      '                size: { type: integer }',
+      '',
+    ].join('\n');
+    const widget = 'apiVersion: example.com/v1\nkind: Widget\nspec:\n  sise: 3\n';
+    const r = await runAction({
+      files: { 'w.yaml': widget, 'crds/widget.yaml': crd },
+      inputs: { crds: 'crds', 'fail-on': 'warning' },
+    });
+    expect(r.exitCode).toBe(1);
+    expect(r.log).toContain('Did you mean "size"?');
+    const bad = await runAction({
+      files: { 'w.yaml': widget, 'crds/widget.yaml': 'kind: Deployment\n' },
+      inputs: { crds: 'crds' },
+    });
+    expect(bad.log).toContain('expected a CustomResourceDefinition');
+  });
+
   it('names the file and the rule when a rule is invalid', async () => {
     const r = await runAction({
       files: {

@@ -89,6 +89,48 @@ describe('manifestlens check', () => {
     }
   });
 
+  it('learns a custom resource from --crd and checks it against the schema', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'ml-crd-'));
+    const crd = join(dir, 'widget-crd.yaml');
+    writeFileSync(
+      crd,
+      `apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+spec:
+  group: example.com
+  names: { kind: Widget }
+  versions:
+    - name: v1
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                size: { type: integer, description: How many sprockets. }
+`,
+    );
+    const widget = join(dir, 'widget.yaml');
+    writeFileSync(widget, 'apiVersion: example.com/v1\nkind: Widget\nspec:\n  sise: 3\n');
+
+    const without = cli('check', widget);
+    expect(without.stdout).toContain('Custom resource Widget');
+    const checked = cli('check', widget, '--crd', crd, '--fail-on', 'warning');
+    expect(checked.code).toBe(1);
+    expect(checked.stdout).toContain('Did you mean "size"?');
+    const good = join(dir, 'good.yaml');
+    writeFileSync(good, 'apiVersion: example.com/v1\nkind: Widget\nspec:\n  size: 3\n');
+    expect(cli('explain', good, '--crd', crd).stdout).toContain('How many sprockets.');
+    const held = cli('fix', widget, '--crd', crd);
+    expect(held.stderr).toContain('Not applied:');
+    expect(held.stderr).toContain('--max-risk medium');
+    const renamed = cli('fix', widget, '--crd', crd, '--max-risk', 'medium');
+    expect(renamed.stdout).toContain('+  size: 3');
+    expect(renamed.stderr).toContain('Rename "sise" to "size"');
+    expect(cli('check', widget, '--crd', widget).code).toBe(2);
+  });
+
   it('rejects broken or duplicate rules with exit 2', () => {
     const bad = join(
       fileURLToPath(new URL('./fixtures/custom-rules/', import.meta.url)),

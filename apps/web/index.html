@@ -181,6 +181,36 @@
           <p id="rules-error" class="error" role="alert" hidden></p>
         </div>
       </details>
+
+      <details class="rules">
+        <summary>
+          Custom resources: paste a CRD or load it from GitHub (used by Explain, Check and Diff)
+        </summary>
+        <div class="rules-body">
+          <p class="hint">
+            Paste the CustomResourceDefinition YAML, for example from
+            <code>kubectl get crd NAME -o yaml</code>. Fields of that kind are then explained and
+            checked against its schema. Nothing leaves your browser unless you load a URL.
+          </p>
+          <div class="url-row">
+            <input
+              id="crd-url"
+              type="url"
+              spellcheck="false"
+              aria-label="CRD URL"
+              placeholder="Or a GitHub link: https://raw.githubusercontent.com/..."
+            />
+            <button id="crd-load" type="button">Load</button>
+          </div>
+          <textarea
+            id="extra-crds"
+            spellcheck="false"
+            aria-label="Custom resource definitions"
+            placeholder="apiVersion: apiextensions.k8s.io/v1&#10;kind: CustomResourceDefinition&#10;..."
+          ></textarea>
+          <p id="crds-error" class="error" role="alert" hidden></p>
+        </div>
+      </details>
     </div>
   </body>
 </html>

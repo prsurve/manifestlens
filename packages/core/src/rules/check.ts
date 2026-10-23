@@ -2,6 +2,8 @@ import { POD_SPEC_PATH } from '../fields/locate.js';
 import { parseManifest } from '../parse.js';
 import type { FieldNode, ManifestDocument } from '../types.js';
 import { kindCoverage } from './coverage.js';
+import { CRD_ISSUES, validateAgainst } from './crd.js';
+import type { CrdIssue, CrdIssueCode } from './crd.js';
 import { evaluate, isPodPath, resolve } from './evaluate.js';
 import type { EvalContext } from './evaluate.js';
 import type { CheckResult, CheckedDocument, Finding, Rule, RuleScope } from './types.js';
@@ -39,8 +41,10 @@ export function matchRules(doc: ManifestDocument, rules: Rule[]): RuleMatch[] {
   const podPath = Object.hasOwn(POD_SPEC_PATH, kind) ? POD_SPEC_PATH[kind] : undefined;
   const podData = podPath === undefined ? undefined : get(doc.data, podPath);
 
+  matches.push(...crdMatches(doc, kind, rules, fieldsByPath));
+
   for (const rule of rules) {
-    if (!rule.kinds.includes('*') && !rule.kinds.includes(kind)) continue;
+    if (rule.crd || (!rule.kinds.includes('*') && !rule.kinds.includes(kind))) continue;
     for (const scope of rule.scopes) {
       for (const instance of scopeInstances(scope, doc.data, podPath, podData)) {
         const ctx: EvalContext = { scope: instance.data, pod: podData };
@@ -55,6 +59,80 @@ export function matchRules(doc: ManifestDocument, rules: Rule[]): RuleMatch[] {
     }
   }
   return matches;
+}
+
+/** Findings from the CustomResourceDefinitions that describe this document's kind. */
+function crdMatches(
+  doc: ManifestDocument,
+  kind: string,
+  rules: Rule[],
+  fieldsByPath: Map<string, FieldNode>,
+): RuleMatch[] {
+  if (!doc.data) return [];
+  const known = rules.filter((r) => r.crd && r.crd.kind === kind);
+  if (known.length === 0) return [];
+  const data = doc.data;
+  const here = known.find((r) => r.crd && `${r.crd.group}/${r.crd.version}` === doc.apiVersion);
+  const make = (
+    rule: Rule,
+    code: CrdIssueCode,
+    issue: CrdIssue | undefined,
+    message: string,
+  ): RuleMatch => {
+    const info = CRD_ISSUES[code];
+    const derived: Rule = {
+      ...rule,
+      id: `crd-${code}`,
+      title: info.title,
+      severity: info.severity,
+      why: info.why,
+      ...(issue?.rename
+        ? {
+            autofix: {
+              risk: 'medium',
+              summary: `Rename "${issue.rename.from}" to "${issue.rename.to}". The settings under it will start to apply, where before they were ignored.`,
+              set: [],
+              rename: issue.rename,
+            },
+          }
+        : {}),
+    };
+    const node = issue ? fieldsByPath.get(issue.path) : undefined;
+    // A list item has no field of its own: point at its first key. The document itself, at its start.
+    const inside =
+      issue && !node && issue.path !== ''
+        ? doc.fields.filter((f) => f.path.startsWith(`${issue.path}.`)).map((f) => f.line)
+        : [];
+    return {
+      rule: derived,
+      instance: { path: issue?.path ?? '', data },
+      ctx: { scope: data, pod: undefined },
+      finding: {
+        ruleId: derived.id,
+        title: info.title,
+        severity: info.severity,
+        message,
+        why: info.why,
+        line: node?.line ?? (inside.length > 0 ? Math.min(...inside) : doc.startLine),
+        ...(node ? { path: node.path } : {}),
+      },
+    };
+  };
+  if (!here?.crd) {
+    const versions = known.map((r) => `${r.crd?.group}/${r.crd?.version}`).join(', ');
+    const rule = known[0] as Rule;
+    return [
+      make(
+        rule,
+        'unknown-version',
+        undefined,
+        `${kind} uses apiVersion "${doc.apiVersion ?? ''}", but its CustomResourceDefinition defines ${versions}.`,
+      ),
+    ];
+  }
+  return validateAgainst(data, here.crd.schema).map((issue) =>
+    make(here, issue.code, issue, issue.message),
+  );
 }
 
 function checkDocument(doc: ManifestDocument, rules: Rule[]): CheckedDocument {

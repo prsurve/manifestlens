@@ -40,6 +40,8 @@ export interface Settings {
   dryRun: boolean;
   /** Extra rule files or folders (YAML). */
   rules: string[];
+  /** CustomResourceDefinition files or folders (YAML), so custom resources are explained and checked. */
+  crds: string[];
   disableRules: string[];
   severityOverrides: Record<string, RuleSeverity>;
   ignore: IgnoreEntry[];

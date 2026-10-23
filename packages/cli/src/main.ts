@@ -22,6 +22,7 @@ import {
   isStale,
   loadBundledRules,
   parseFixPolicy,
+  parseCrds,
   parseRules,
   unifiedDiff,
 } from '@manifestlens/core';
@@ -37,10 +38,12 @@ export interface Io {
 }
 
 const USAGE = `Usage:
-  manifestlens explain <file>
-  manifestlens check <file> [--rules <file-or-dir>]... [--fail-on error|warning|info|none]
-  manifestlens diff <old-file> <new-file> [--rules <file-or-dir>]... [--fail-on ...]
-  manifestlens fix <file> [--rules <file-or-dir>]... [--policy <file>] [--max-risk low|medium|high]
+  manifestlens explain <file> [--crd <file-or-dir>]...
+  manifestlens check <file> [--rules <file-or-dir>]... [--crd <file-or-dir>]...
+                   [--fail-on error|warning|info|none]
+  manifestlens diff <old-file> <new-file> [--rules <file-or-dir>]... [--crd <file-or-dir>]...
+                   [--fail-on ...]
+  manifestlens fix <file> [--rules <file-or-dir>]... [--crd <file-or-dir>]... [--policy <file>] [--max-risk low|medium|high]
                    [--only <rule-id>]... [--write] [--no-backup]
 
 explain  Explain a Kubernetes manifest in plain English, line by line.
@@ -53,6 +56,9 @@ fix      Preview fixes for findings that have one, as a unified diff (nothing is
 Options:
   --rules <path>   Also load rules from a YAML file, or every .yaml file in a directory
                    (repeatable)
+  --crd <path>     Also learn custom resources from CustomResourceDefinition YAML (a file, or every
+                   .yaml file in a directory, e.g. from kubectl get crd -o yaml). Their fields are
+                   explained and checked against the schema (repeatable)
   --fail-on <lvl>  Exit 1 if there is a (new) finding at this level or worse (default: error)
   --policy <file>  Values for fixes that cannot guess them (YAML, "params:"), e.g. memoryLimit
   --max-risk <lvl> Highest fix risk to apply: low (default), medium or high
@@ -75,6 +81,7 @@ export function run(argv: string[], io: Io): number {
       options: {
         help: { type: 'boolean', short: 'h' },
         rules: { type: 'string', multiple: true },
+        crd: { type: 'string', multiple: true },
         'fail-on': { type: 'string' },
         policy: { type: 'string' },
         'max-risk': { type: 'string' },
@@ -107,6 +114,7 @@ export function run(argv: string[], io: Io): number {
       file,
       extra[0] as string,
       parsed.values.rules ?? [],
+      parsed.values.crd ?? [],
       parsed.values['fail-on'],
       io,
     );
@@ -123,12 +131,21 @@ export function run(argv: string[], io: Io): number {
   if (command === 'fix') {
     return runFix(file, source, parsed.values, io);
   }
-  if (command === 'explain') return runExplain(file, source, io);
-  return runCheck(file, source, parsed.values.rules ?? [], parsed.values['fail-on'], io);
+  if (command === 'explain') return runExplain(file, source, parsed.values.crd ?? [], io);
+  return runCheck(
+    file,
+    source,
+    parsed.values.rules ?? [],
+    parsed.values.crd ?? [],
+    parsed.values['fail-on'],
+    io,
+  );
 }
 
-function runExplain(file: string, source: string, io: Io): number {
-  const result = explainManifest(source);
+function runExplain(file: string, source: string, crdPaths: string[], io: Io): number {
+  const rules = loadAllRules([], crdPaths, io);
+  if (!rules) return 2;
+  const result = explainManifest(source, rules);
   if (result.documents.length === 0) {
     io.stderr(`${file}: no Kubernetes documents found.\n`);
     return 1;
@@ -138,10 +155,14 @@ function runExplain(file: string, source: string, io: Io): number {
 }
 
 /** Load bundled plus extra rules, or explain to the user why that failed. */
-function loadAllRules(rulePaths: string[], io: Io): Rule[] | undefined {
+function loadAllRules(rulePaths: string[], crdPaths: string[], io: Io): Rule[] | undefined {
   let rules: Rule[];
   try {
-    rules = [...loadBundledRules(), ...rulePaths.flatMap(loadRuleFiles)];
+    rules = [
+      ...loadBundledRules(),
+      ...rulePaths.flatMap((p) => loadRuleFiles(p, parseRules)),
+      ...crdPaths.flatMap((p) => loadRuleFiles(p, parseCrds)),
+    ];
   } catch (err) {
     io.stderr(`${err instanceof Error ? err.message : String(err)}\n`);
     return undefined;
@@ -174,6 +195,7 @@ function runDiff(
   oldFile: string,
   newFile: string,
   rulePaths: string[],
+  crdPaths: string[],
   failOn: string | undefined,
   io: Io,
 ): number {
@@ -187,7 +209,7 @@ function runDiff(
       return 2;
     }
   }
-  const rules = loadAllRules(rulePaths, io);
+  const rules = loadAllRules(rulePaths, crdPaths, io);
   if (!rules) return 2;
 
   const result = diffManifests(sources[0] as string, sources[1] as string, rules);
@@ -207,6 +229,7 @@ function runDiff(
 
 interface FixFlags {
   rules?: string[] | undefined;
+  crd?: string[] | undefined;
   policy?: string | undefined;
   'max-risk'?: string | undefined;
   only?: string[] | undefined;
@@ -226,7 +249,7 @@ function runFix(file: string, source: string, flags: FixFlags, io: Io): number {
     io.stderr('--no-backup only makes sense with --write.\n');
     return 2;
   }
-  const rules = loadAllRules(flags.rules ?? [], io);
+  const rules = loadAllRules(flags.rules ?? [], flags.crd ?? [], io);
   if (!rules) return 2;
 
   const options: FixOptions = { maxRisk: maxRisk as FixRisk };
@@ -314,11 +337,12 @@ function runCheck(
   file: string,
   source: string,
   rulePaths: string[],
+  crdPaths: string[],
   failOn: string | undefined,
   io: Io,
 ): number {
   if (!validFailOn(failOn, io)) return 2;
-  const rules = loadAllRules(rulePaths, io);
+  const rules = loadAllRules(rulePaths, crdPaths, io);
   if (!rules) return 2;
 
   const result = checkManifest(source, rules);
@@ -337,8 +361,8 @@ function runCheck(
     : 0;
 }
 
-/** Load rules from a YAML file, or from every .yaml/.yml file in a directory. */
-function loadRuleFiles(path: string): Rule[] {
+/** Load rules (or CRDs) from a YAML file, or from every .yaml/.yml file in a directory. */
+function loadRuleFiles(path: string, parse: (text: string, origin: string) => Rule[]): Rule[] {
   let files: string[];
   try {
     files = statSync(path).isDirectory()
@@ -352,7 +376,7 @@ function loadRuleFiles(path: string): Rule[] {
       `Cannot read rules at ${path}: ${err instanceof Error ? err.message : String(err)}`,
     );
   }
-  return files.flatMap((f) => parseRules(readFileSync(f, 'utf8'), f));
+  return files.flatMap((f) => parse(readFileSync(f, 'utf8'), f));
 }
 
 function isMain(): boolean {

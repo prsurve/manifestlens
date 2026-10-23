@@ -77,38 +77,39 @@ ends with a "Configuration used" table showing the value and the level each sett
 
 All are optional.
 
-| Input                 | Default                    | Meaning                                                                                       |
-| --------------------- | -------------------------- | --------------------------------------------------------------------------------------------- |
-| `paths`               | `**/*.yaml`, `**/*.yml`    | Globs, one per line; `!` excludes. Only files with `apiVersion` and `kind` are checked.       |
-| `working-directory`   | repository root            | What `paths` is relative to (monorepos, matrix jobs).                                         |
-| `config-file`         | `.github/manifestlens.yml` | Project settings file.                                                                        |
-| `scope`               | `all`                      | `all`, `changed` (files this change touches) or `new` (only findings this change introduces). |
-| `base-ref`            | from the event             | What to compare with for `changed` and `new`.                                                 |
-| `fail-on`             | `error`                    | `error`, `warning`, `info` or `none`.                                                         |
-| `max-errors`          | from `fail-on`             | Most errors allowed.                                                                          |
-| `max-warnings`        | from `fail-on`             | Most warnings allowed.                                                                        |
-| `max-info`            | from `fail-on`             | Most info findings allowed.                                                                   |
-| `max-total`           | no limit                   | Most findings of any severity.                                                                |
-| `fail-on-parse-error` | `true`                     | Fail on a manifest that is not valid YAML.                                                    |
-| `mode`                | `enforce`                  | `enforce` or `report`.                                                                        |
-| `dry-run`             | `false`                    | Compute and log only.                                                                         |
-| `rules`               | none                       | Extra rule files or folders in the repository ([how to write rules](writing-rules.md)).       |
-| `disable-rules`       | none                       | Rule ids to turn off.                                                                         |
-| `severity-overrides`  | none                       | `rule-id=severity` per line (`error`, `warning`, `info`, `off`).                              |
-| `annotations`         | `true`                     | Mark findings on the changed lines in pull requests.                                          |
-| `max-annotations`     | `30`                       | Most annotations in total; GitHub shows 10 of each severity.                                  |
-| `comment`             | `auto`                     | `auto`: comment when there is something to say. `always`. `never`.                            |
-| `summary`             | `true`                     | Write the job summary.                                                                        |
-| `sarif-file`          | none                       | Write SARIF here for code scanning.                                                           |
-| `suggest-fixes`       | `false`                    | List validated automatic fixes in the summary and report. Nothing is changed.                 |
-| `fix-patch-file`      | none                       | Write all suggested fixes as one unified diff for `git apply`. Implies `suggest-fixes`.       |
-| `fix-max-risk`        | `low`                      | Highest fix risk to suggest: `low`, `medium` or `high`.                                       |
-| `fix-policy`          | none                       | YAML file in the repository with values fixes cannot guess ([auto-fix.md](auto-fix.md)).      |
-| `report-file`         | `manifestlens-report.json` | Where to write the JSON report.                                                               |
-| `label`               | none                       | Names the run: separate summary heading and pull request comment per matrix leg.              |
-| `max-files`           | `2000`                     | Safety limit on files matched.                                                                |
-| `max-file-size-kb`    | `1024`                     | Larger files are skipped.                                                                     |
-| `github-token`        | `${{ github.token }}`      | Used only for the pull request comment.                                                       |
+| Input                 | Default                    | Meaning                                                                                                                                                      |
+| --------------------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `paths`               | `**/*.yaml`, `**/*.yml`    | Globs, one per line; `!` excludes. Only files with `apiVersion` and `kind` are checked.                                                                      |
+| `working-directory`   | repository root            | What `paths` is relative to (monorepos, matrix jobs).                                                                                                        |
+| `config-file`         | `.github/manifestlens.yml` | Project settings file.                                                                                                                                       |
+| `scope`               | `all`                      | `all`, `changed` (files this change touches) or `new` (only findings this change introduces).                                                                |
+| `base-ref`            | from the event             | What to compare with for `changed` and `new`.                                                                                                                |
+| `fail-on`             | `error`                    | `error`, `warning`, `info` or `none`.                                                                                                                        |
+| `max-errors`          | from `fail-on`             | Most errors allowed.                                                                                                                                         |
+| `max-warnings`        | from `fail-on`             | Most warnings allowed.                                                                                                                                       |
+| `max-info`            | from `fail-on`             | Most info findings allowed.                                                                                                                                  |
+| `max-total`           | no limit                   | Most findings of any severity.                                                                                                                               |
+| `fail-on-parse-error` | `true`                     | Fail on a manifest that is not valid YAML.                                                                                                                   |
+| `mode`                | `enforce`                  | `enforce` or `report`.                                                                                                                                       |
+| `dry-run`             | `false`                    | Compute and log only.                                                                                                                                        |
+| `rules`               | none                       | Extra rule files or folders in the repository ([how to write rules](writing-rules.md)).                                                                      |
+| `crds`                | none                       | CustomResourceDefinition files or folders in the repository, so custom resources are checked against their schema ([custom resources](custom-resources.md)). |
+| `disable-rules`       | none                       | Rule ids to turn off.                                                                                                                                        |
+| `severity-overrides`  | none                       | `rule-id=severity` per line (`error`, `warning`, `info`, `off`).                                                                                             |
+| `annotations`         | `true`                     | Mark findings on the changed lines in pull requests.                                                                                                         |
+| `max-annotations`     | `30`                       | Most annotations in total; GitHub shows 10 of each severity.                                                                                                 |
+| `comment`             | `auto`                     | `auto`: comment when there is something to say. `always`. `never`.                                                                                           |
+| `summary`             | `true`                     | Write the job summary.                                                                                                                                       |
+| `sarif-file`          | none                       | Write SARIF here for code scanning.                                                                                                                          |
+| `suggest-fixes`       | `false`                    | List validated automatic fixes in the summary and report. Nothing is changed.                                                                                |
+| `fix-patch-file`      | none                       | Write all suggested fixes as one unified diff for `git apply`. Implies `suggest-fixes`.                                                                      |
+| `fix-max-risk`        | `low`                      | Highest fix risk to suggest: `low`, `medium` or `high`.                                                                                                      |
+| `fix-policy`          | none                       | YAML file in the repository with values fixes cannot guess ([auto-fix.md](auto-fix.md)).                                                                     |
+| `report-file`         | `manifestlens-report.json` | Where to write the JSON report.                                                                                                                              |
+| `label`               | none                       | Names the run: separate summary heading and pull request comment per matrix leg.                                                                             |
+| `max-files`           | `2000`                     | Safety limit on files matched.                                                                                                                               |
+| `max-file-size-kb`    | `1024`                     | Larger files are skipped.                                                                                                                                    |
+| `github-token`        | `${{ github.token }}`      | Used only for the pull request comment.                                                                                                                      |
 
 ## Outputs
 

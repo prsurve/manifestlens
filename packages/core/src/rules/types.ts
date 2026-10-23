@@ -37,6 +37,39 @@ export interface FixSpec {
   /** Shown when `requires` is false, so the reason is specific ("runAsUser is 0"). */
   blockedMessage?: string;
   set: FixSet[];
+  /** Rename a mapping key instead of setting values; used for a mistyped field of a custom resource. */
+  rename?: { parent: string; from: string; to: string };
+}
+
+/** A subset of an OpenAPI v3 schema, as found in a CustomResourceDefinition. */
+export interface CrdSchema {
+  type?: string;
+  description?: string;
+  properties?: Record<string, CrdSchema>;
+  additionalProperties?: CrdSchema | boolean;
+  items?: CrdSchema;
+  required?: string[];
+  enum?: unknown[];
+  pattern?: string;
+  minimum?: number;
+  maximum?: number;
+  minLength?: number;
+  maxLength?: number;
+  nullable?: boolean;
+  'x-kubernetes-preserve-unknown-fields'?: boolean;
+  'x-kubernetes-int-or-string'?: boolean;
+  oneOf?: unknown;
+  anyOf?: unknown;
+  allOf?: unknown;
+  not?: unknown;
+}
+
+/** What a CustomResourceDefinition teaches ManifestLens about one version of a custom kind. */
+export interface CrdInfo {
+  group: string;
+  version: string;
+  kind: string;
+  schema: CrdSchema;
 }
 
 export interface Rule {
@@ -56,6 +89,8 @@ export interface Rule {
   autofix?: FixSpec;
   /** Where the rule was loaded from, for error messages. */
   origin?: string;
+  /** Set on the rule a CustomResourceDefinition compiles to: the manifest is checked against it. */
+  crd?: CrdInfo;
 }
 
 export interface Finding {

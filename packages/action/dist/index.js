@@ -17819,9 +17819,9 @@ var require_sender = __commonJS({
       constructor(socket) {
         this.#socket = socket;
       }
-      add(item, cb, hint) {
-        if (hint !== sendHints.blob) {
-          const frame = createFrame(item, hint);
+      add(item, cb, hint2) {
+        if (hint2 !== sendHints.blob) {
+          const frame = createFrame(item, hint2);
           if (!this.#running) {
             this.#socket.write(frame, cb);
           } else {
@@ -17837,7 +17837,7 @@ var require_sender = __commonJS({
         const node = {
           promise: item.arrayBuffer().then((ab) => {
             node.promise = null;
-            node.frame = createFrame(ab, hint);
+            node.frame = createFrame(ab, hint2);
           }),
           callback: cb,
           frame: null
@@ -17861,11 +17861,11 @@ var require_sender = __commonJS({
         this.#running = false;
       }
     };
-    function createFrame(data, hint) {
-      return new WebsocketFrameSend(toBuffer(data, hint)).createFrame(hint === sendHints.string ? opcodes.TEXT : opcodes.BINARY);
+    function createFrame(data, hint2) {
+      return new WebsocketFrameSend(toBuffer(data, hint2)).createFrame(hint2 === sendHints.string ? opcodes.TEXT : opcodes.BINARY);
     }
-    function toBuffer(data, hint) {
-      switch (hint) {
+    function toBuffer(data, hint2) {
+      switch (hint2) {
         case sendHints.string:
           return Buffer.from(data);
         case sendHints.arrayBuffer:
@@ -19156,7 +19156,7 @@ var require_identity = __commonJS({
     var NODE_TYPE = /* @__PURE__ */ Symbol.for("yaml.node.type");
     var isAlias2 = (node) => !!node && typeof node === "object" && node[NODE_TYPE] === ALIAS;
     var isDocument = (node) => !!node && typeof node === "object" && node[NODE_TYPE] === DOC;
-    var isMap5 = (node) => !!node && typeof node === "object" && node[NODE_TYPE] === MAP;
+    var isMap6 = (node) => !!node && typeof node === "object" && node[NODE_TYPE] === MAP;
     var isPair = (node) => !!node && typeof node === "object" && node[NODE_TYPE] === PAIR;
     var isScalar3 = (node) => !!node && typeof node === "object" && node[NODE_TYPE] === SCALAR;
     var isSeq3 = (node) => !!node && typeof node === "object" && node[NODE_TYPE] === SEQ;
@@ -19192,7 +19192,7 @@ var require_identity = __commonJS({
     exports2.isAlias = isAlias2;
     exports2.isCollection = isCollection2;
     exports2.isDocument = isDocument;
-    exports2.isMap = isMap5;
+    exports2.isMap = isMap6;
     exports2.isNode = isNode;
     exports2.isPair = isPair;
     exports2.isScalar = isScalar3;
@@ -23304,9 +23304,9 @@ var require_resolve_flow_collection = __commonJS({
     var blockMsg = "Block collections are not allowed within flow collections";
     var isBlock = (token) => token && (token.type === "block-map" || token.type === "block-seq");
     function resolveFlowCollection({ composeNode, composeEmptyNode }, ctx, fc, onError, tag) {
-      const isMap5 = fc.start.source === "{";
-      const fcName = isMap5 ? "flow map" : "flow sequence";
-      const NodeClass = tag?.nodeClass ?? (isMap5 ? YAMLMap.YAMLMap : YAMLSeq.YAMLSeq);
+      const isMap6 = fc.start.source === "{";
+      const fcName = isMap6 ? "flow map" : "flow sequence";
+      const NodeClass = tag?.nodeClass ?? (isMap6 ? YAMLMap.YAMLMap : YAMLSeq.YAMLSeq);
       const coll = new NodeClass(ctx.schema);
       coll.flow = true;
       const atRoot = ctx.atRoot;
@@ -23342,7 +23342,7 @@ var require_resolve_flow_collection = __commonJS({
             offset = props.end;
             continue;
           }
-          if (!isMap5 && ctx.options.strict && utilContainsNewline.containsNewline(key))
+          if (!isMap6 && ctx.options.strict && utilContainsNewline.containsNewline(key))
             onError(
               key,
               // checked by containsNewline()
@@ -23382,7 +23382,7 @@ var require_resolve_flow_collection = __commonJS({
             }
           }
         }
-        if (!isMap5 && !sep8 && !props.found) {
+        if (!isMap6 && !sep8 && !props.found) {
           const valueNode = value ? composeNode(ctx, value, props, onError) : composeEmptyNode(ctx, props.end, sep8, null, props, onError);
           coll.items.push(valueNode);
           offset = valueNode.range[2];
@@ -23405,7 +23405,7 @@ var require_resolve_flow_collection = __commonJS({
             startOnNewline: false
           });
           if (valueProps.found) {
-            if (!isMap5 && !props.found && ctx.options.strict) {
+            if (!isMap6 && !props.found && ctx.options.strict) {
               if (sep8)
                 for (const st of sep8) {
                   if (st === valueProps.found)
@@ -23437,7 +23437,7 @@ var require_resolve_flow_collection = __commonJS({
           const pair = new Pair.Pair(keyNode, valueNode);
           if (ctx.options.keepSourceTokens)
             pair.srcToken = collItem;
-          if (isMap5) {
+          if (isMap6) {
             const map = coll;
             if (utilMapIncludes.mapIncludes(ctx, map.items, keyNode))
               onError(keyStart, "DUPLICATE_KEY", "Map keys must be unique");
@@ -23453,7 +23453,7 @@ var require_resolve_flow_collection = __commonJS({
           offset = valueNode ? valueNode.range[2] : valueProps.end;
         }
       }
-      const expectedEnd = isMap5 ? "}" : "]";
+      const expectedEnd = isMap6 ? "}" : "]";
       const [ce, ...ee] = fc.end;
       let cePos = offset;
       if (ce?.source === expectedEnd)
@@ -26340,7 +26340,7 @@ var require_public_api = __commonJS({
       const lineCounter$1 = options.lineCounter || prettyErrors && new lineCounter.LineCounter() || null;
       return { lineCounter: lineCounter$1, prettyErrors };
     }
-    function parseAllDocuments3(source, options = {}) {
+    function parseAllDocuments4(source, options = {}) {
       const { lineCounter: lineCounter2, prettyErrors } = parseOptions(options);
       const parser$1 = new parser.Parser(lineCounter2?.addNewLine);
       const composer$1 = new composer.Composer(options);
@@ -26415,7 +26415,7 @@ var require_public_api = __commonJS({
       return new Document.Document(value, _replacer, options).toString(options);
     }
     exports2.parse = parse2;
-    exports2.parseAllDocuments = parseAllDocuments3;
+    exports2.parseAllDocuments = parseAllDocuments4;
     exports2.parseDocument = parseDocument2;
     exports2.stringify = stringify2;
   }
@@ -27519,6 +27519,833 @@ function join(prefix, key) {
   return prefix === "" ? key : `${prefix}.${key}`;
 }
 
+// ../core/src/rules/coverage.ts
+function isCustomResource(apiVersion) {
+  const group = apiVersion?.includes("/") ? apiVersion.slice(0, apiVersion.indexOf("/")) : "";
+  return group.includes(".") && !/^([a-z0-9-]+\.)*k8s\.io$/.test(group);
+}
+function distance(a, b) {
+  let prev = Array.from({ length: b.length + 1 }, (_, i) => i);
+  for (let i = 1; i <= a.length; i++) {
+    const row = [i];
+    for (let j = 1; j <= b.length; j++) {
+      const cost = a[i - 1]?.toLowerCase() === b[j - 1]?.toLowerCase() ? 0 : 1;
+      row[j] = Math.min((prev[j] ?? 0) + 1, (row[j - 1] ?? 0) + 1, (prev[j - 1] ?? 0) + cost);
+    }
+    prev = row;
+  }
+  return prev[b.length] ?? 0;
+}
+function suggestKind(kind, rules) {
+  const known = [.../* @__PURE__ */ new Set([...supportedKinds(), ...checkedKinds(rules)])];
+  let best;
+  for (const k of known) {
+    const prefix = k.length >= 3 && kind.toLowerCase().startsWith(k.toLowerCase());
+    const d = prefix ? 1 : distance(kind, k);
+    if (!best || d < best.d) best = { kind: k, d };
+  }
+  return best && best.d <= Math.max(2, Math.floor(kind.length / 3)) ? best.kind : void 0;
+}
+function checkedKinds(rules) {
+  const kinds = new Set(Object.keys(POD_SPEC_PATH));
+  for (const rule of rules) for (const kind of rule.kinds) if (kind !== "*") kinds.add(kind);
+  return [...kinds].sort();
+}
+function kindCoverage(kind, apiVersion, rules) {
+  if (kind === void 0) {
+    return describe(
+      "unchecked",
+      'No "kind" field',
+      "Without a kind ManifestLens cannot tell what this is, so nothing was checked."
+    );
+  }
+  if (Object.hasOwn(POD_SPEC_PATH, kind) || rules.some((r) => r.kinds.includes(kind))) {
+    return { level: "checked" };
+  }
+  if (hasDocsFor(kind)) {
+    return describe(
+      "explain-only",
+      `No rules for ${kind}`,
+      `ManifestLens explains ${kind} fields, but no rule checks it.`
+    );
+  }
+  if (isCustomResource(apiVersion)) {
+    return describe(
+      "unchecked",
+      `Custom resource ${kind} (${apiVersion})`,
+      "ManifestLens has no rules for custom resources, so it was not checked."
+    );
+  }
+  return describe(
+    "unchecked",
+    `Unknown kind "${kind}"`,
+    "ManifestLens has no rules for it, so it was not checked.",
+    suggestKind(kind, rules)
+  );
+}
+function describe(level, headline2, detail, suggestion) {
+  const note = '"No findings" does not mean it is safe.';
+  const hint2 = suggestion ? `Did you mean "${suggestion}"?` : void 0;
+  return {
+    level,
+    headline: headline2,
+    detail,
+    note,
+    ...suggestion !== void 0 ? { suggestion } : {},
+    message: [`${headline2}.`, detail, hint2, note].filter(Boolean).join(" ")
+  };
+}
+
+// ../core/src/rules/crd.ts
+var import_yaml3 = __toESM(require_dist(), 1);
+
+// ../core/src/rules/load.ts
+var import_yaml2 = __toESM(require_dist(), 1);
+var RuleError = class extends Error {
+  constructor(message) {
+    super(message);
+    this.name = "RuleError";
+  }
+};
+var SEVERITIES = ["info", "warning", "error"];
+var SCOPES = ["document", "pod", "container", "initContainer"];
+var RULE_KEYS = [
+  "id",
+  "title",
+  "severity",
+  "kinds",
+  "scope",
+  "when",
+  "report",
+  "message",
+  "why",
+  "fix",
+  "autofix"
+];
+function parseRules(text2, origin = "rules") {
+  const rules = [];
+  for (const doc of (0, import_yaml2.parseAllDocuments)(text2)) {
+    if (doc.errors.length > 0) {
+      throw new RuleError(`${origin}: ${doc.errors[0]?.message.split("\n")[0] ?? "invalid YAML"}`);
+    }
+    if (doc.contents === null) continue;
+    if (!(0, import_yaml2.isMap)(doc.contents)) {
+      throw new RuleError(`${origin}: each rule must be a mapping.`);
+    }
+    const data = doc.toJS();
+    if (data === null || data === void 0) continue;
+    rules.push(toRule(data, origin, rules.length + 1));
+  }
+  return rules;
+}
+function toRule(raw, origin, position) {
+  const label2 = typeof raw.id === "string" ? `${origin}: rule "${raw.id}"` : `${origin}: rule #${position}`;
+  const fail = (msg) => {
+    throw new RuleError(`${label2}: ${msg}`);
+  };
+  for (const key of Object.keys(raw)) {
+    if (!RULE_KEYS.includes(key)) fail(`unknown key "${key}".`);
+  }
+  const id = requiredString(raw, "id", fail);
+  if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(id)) fail('"id" must be lowercase words joined by dashes.');
+  const title = requiredString(raw, "title", fail);
+  const message = requiredString(raw, "message", fail);
+  const severity = raw.severity;
+  if (!SEVERITIES.includes(severity)) {
+    fail(`"severity" must be one of ${SEVERITIES.join(", ")}.`);
+  }
+  const kinds = stringList(raw.kinds);
+  if (!kinds || kinds.length === 0) fail('"kinds" must be a non-empty list of strings.');
+  const scopeRaw = raw.scope === void 0 ? ["document"] : stringList(raw.scope);
+  if (!scopeRaw || scopeRaw.length === 0 || scopeRaw.some((s) => !SCOPES.includes(s))) {
+    fail(`"scope" must be one or a list of ${SCOPES.join(", ")}.`);
+  }
+  const reportRaw = raw.report === void 0 ? [] : stringList(raw.report);
+  if (!reportRaw) fail('"report" must be a path or a list of paths.');
+  if (raw.when === void 0) fail('"when" is required.');
+  const when = toCondition(raw.when, fail);
+  const rule = {
+    id,
+    title,
+    severity,
+    kinds,
+    scopes: scopeRaw,
+    when,
+    report: reportRaw,
+    message,
+    origin
+  };
+  for (const key of ["why", "fix"]) {
+    const value = raw[key];
+    if (value === void 0) continue;
+    if (typeof value !== "string") fail(`"${key}" must be a string.`);
+    rule[key] = value.trim();
+  }
+  if (raw.autofix !== void 0) rule.autofix = toFixSpec(raw.autofix, fail);
+  return rule;
+}
+var FIX_RISKS = ["low", "medium", "high"];
+var FIX_KEYS = ["risk", "summary", "requires", "blocked", "set"];
+var FIX_PATH = /^[A-Za-z0-9_-]+(\.[A-Za-z0-9_-]+)*$/;
+function toFixSpec(raw, fail) {
+  if (raw === null || typeof raw !== "object" || Array.isArray(raw)) {
+    return fail('"autofix" must be a mapping.');
+  }
+  const obj = raw;
+  for (const key of Object.keys(obj)) {
+    if (!FIX_KEYS.includes(key)) fail(`unknown key "${key}" in "autofix".`);
+  }
+  if (!FIX_RISKS.includes(obj.risk)) {
+    fail(`"autofix.risk" must be one of ${FIX_RISKS.join(", ")}.`);
+  }
+  if (typeof obj.summary !== "string" || obj.summary.trim() === "") {
+    fail('"autofix.summary" is required.');
+  }
+  const summary2 = obj.summary.trim();
+  if (obj.blocked !== void 0 && (typeof obj.blocked !== "string" || obj.blocked.trim() === "")) {
+    fail('"autofix.blocked" must be a non-empty string.');
+  }
+  const set = obj.set;
+  if (set === null || typeof set !== "object" || Array.isArray(set) || Object.keys(set).length === 0) {
+    return fail('"autofix.set" must be a non-empty mapping of path to value.');
+  }
+  const sets = Object.entries(set).map(([path6, value]) => {
+    if (!FIX_PATH.test(path6)) {
+      return fail(`"autofix.set" path "${path6}" must be plain dotted keys, with no [] or $pod.`);
+    }
+    const isParam = value !== null && typeof value === "object" && !Array.isArray(value) && "$param" in value;
+    if (!isParam) return { path: path6, value };
+    const { $param: name, pattern, ...extra } = value;
+    if (Object.keys(extra).length > 0 || typeof name !== "string" || !/^\w+$/.test(name) || pattern !== void 0 && typeof pattern !== "string") {
+      return fail(
+        `"autofix.set" value for "${path6}" must be { $param: name } with an optional "pattern".`
+      );
+    }
+    if (pattern === void 0) return { path: path6, param: name };
+    try {
+      return { path: path6, param: name, pattern: new RegExp(pattern) };
+    } catch {
+      return fail(`invalid regular expression "${pattern}" for "${path6}".`);
+    }
+  });
+  const paths = sets.map((s) => s.path);
+  for (const a of paths) {
+    if (paths.some((b) => b !== a && b.startsWith(`${a}.`))) {
+      fail(`"autofix.set" paths "${a}" and a path below it cannot both be set.`);
+    }
+  }
+  return {
+    risk: obj.risk,
+    summary: summary2,
+    ...obj.requires !== void 0 ? { requires: toCondition(obj.requires, fail) } : {},
+    ...obj.blocked !== void 0 ? { blockedMessage: obj.blocked.trim() } : {},
+    set: sets
+  };
+}
+function requiredString(raw, key, fail) {
+  const value = raw[key];
+  if (typeof value !== "string" || value.trim() === "") fail(`"${key}" is required.`);
+  return value.trim();
+}
+function stringList(value) {
+  if (typeof value === "string") return [value];
+  if (Array.isArray(value) && value.every((v) => typeof v === "string")) return value;
+  return void 0;
+}
+function toCondition(raw, fail) {
+  if (raw === null || typeof raw !== "object" || Array.isArray(raw)) {
+    return fail("a condition must be a mapping such as { missing: some.path }.");
+  }
+  const entries = Object.entries(raw);
+  if (entries.length !== 1) return fail("a condition must have exactly one operator.");
+  const [op, arg] = entries[0];
+  switch (op) {
+    case "missing":
+    case "present":
+      if (typeof arg !== "string") return fail(`"${op}" takes a path.`);
+      return { op, path: arg };
+    case "equals":
+    case "contains":
+    case "matches":
+    case "in": {
+      const [path6, value] = singleEntry(op, arg, fail);
+      if (op === "matches") {
+        if (typeof value !== "string") return fail('"matches" takes a regular expression string.');
+        try {
+          const insensitive = value.startsWith("(?i)");
+          return {
+            op,
+            path: path6,
+            pattern: new RegExp(insensitive ? value.slice(4) : value, insensitive ? "i" : "")
+          };
+        } catch {
+          return fail(`invalid regular expression "${value}".`);
+        }
+      }
+      if (op === "in") {
+        if (!Array.isArray(value)) return fail('"in" takes a list of values.');
+        return { op, path: path6, values: value };
+      }
+      return { op, path: path6, value };
+    }
+    case "all":
+    case "any":
+      if (!Array.isArray(arg) || arg.length === 0) return fail(`"${op}" takes a non-empty list.`);
+      return { op, conditions: arg.map((c) => toCondition(c, fail)) };
+    case "not":
+      return { op: "not", condition: toCondition(arg, fail) };
+    case "some": {
+      const obj = arg;
+      if (obj === null || typeof obj !== "object" || Array.isArray(obj) || typeof obj.in !== "string" || obj.where === void 0 || Object.keys(obj).length !== 2) {
+        return fail('"some" takes { in: path-to-a-list, where: condition }.');
+      }
+      return { op: "some", path: obj.in, condition: toCondition(obj.where, fail) };
+    }
+    default:
+      return fail(`unknown operator "${op}".`);
+  }
+}
+function singleEntry(op, arg, fail) {
+  if (arg === null || typeof arg !== "object" || Array.isArray(arg)) {
+    return fail(`"${op}" takes a single { path: value } pair.`);
+  }
+  const entries = Object.entries(arg);
+  if (entries.length !== 1) return fail(`"${op}" takes exactly one { path: value } pair.`);
+  return entries[0];
+}
+
+// ../core/src/rules/crd.ts
+var MAX_CRD_BYTES = 8 * 1024 * 1024;
+var MAX_DEPTH = 40;
+function parseCrds(text2, origin = "crd") {
+  if (text2.length > MAX_CRD_BYTES) throw new RuleError(`${origin}: the CRD text is too large.`);
+  const rules = [];
+  for (const doc of (0, import_yaml3.parseAllDocuments)(text2)) {
+    if (doc.errors.length > 0) {
+      throw new RuleError(`${origin}: ${doc.errors[0]?.message.split("\n")[0] ?? "invalid YAML"}`);
+    }
+    if (doc.contents === null || !(0, import_yaml3.isMap)(doc.contents)) continue;
+    const data = doc.toJS();
+    const items = data.kind === "List" && Array.isArray(data.items) ? data.items : [data];
+    for (const item of items) {
+      if (!isRecord(item)) continue;
+      if (item.kind !== "CustomResourceDefinition") {
+        throw new RuleError(
+          `${origin}: expected a CustomResourceDefinition but found kind "${String(item.kind)}".`
+        );
+      }
+      rules.push(...fromCrd(item, origin));
+    }
+  }
+  return rules;
+}
+function fromCrd(crd, origin) {
+  const spec = crd.spec;
+  const names = isRecord(spec) && isRecord(spec.names) ? spec.names : void 0;
+  const group = isRecord(spec) ? spec.group : void 0;
+  const kind = names?.kind;
+  if (!isRecord(spec) || typeof group !== "string" || typeof kind !== "string") {
+    throw new RuleError(
+      `${origin}: a CustomResourceDefinition needs spec.group and spec.names.kind.`
+    );
+  }
+  const versions = Array.isArray(spec.versions) ? spec.versions : [];
+  const legacy = isRecord(spec.validation) ? spec.validation.openAPIV3Schema : void 0;
+  const rules = [];
+  for (const v of versions) {
+    if (!isRecord(v) || typeof v.name !== "string") continue;
+    const schema2 = isRecord(v.schema) ? v.schema.openAPIV3Schema : legacy;
+    if (!isRecord(schema2)) continue;
+    rules.push(crdRule({ group, version: v.name, kind, schema: schema2 }, origin));
+  }
+  if (rules.length === 0) {
+    throw new RuleError(`${origin}: ${kind} has no openAPIV3Schema, so there is nothing to check.`);
+  }
+  return rules;
+}
+function crdRule(crd, origin) {
+  return {
+    id: `crd-${crd.kind}-${crd.version}`.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
+    title: `${crd.kind} matches its CustomResourceDefinition`,
+    severity: "warning",
+    kinds: [crd.kind],
+    scopes: ["document"],
+    when: { op: "any", conditions: [] },
+    report: [],
+    message: `${crd.kind} does not match its CustomResourceDefinition.`,
+    origin,
+    crd
+  };
+}
+function isRecord(v) {
+  return v !== null && typeof v === "object" && !Array.isArray(v);
+}
+var CRD_ISSUES = {
+  "not-validated": {
+    title: "Part of the schema cannot be checked",
+    severity: "info",
+    why: 'ManifestLens does not evaluate oneOf, anyOf, allOf, not or CEL rules, so this part was not validated. "No findings" here does not mean it is valid.'
+  },
+  "unknown-version": {
+    title: "apiVersion is not in the CustomResourceDefinition",
+    severity: "warning",
+    why: "The API server only serves the versions the CustomResourceDefinition lists."
+  },
+  "unknown-field": {
+    title: "Field is not in the CustomResourceDefinition",
+    severity: "warning",
+    why: "The API server drops fields it does not know, or rejects the manifest, so this setting is probably a typo and has no effect."
+  },
+  "wrong-type": {
+    title: "Field has the wrong type",
+    severity: "error",
+    why: "The API server rejects a value of the wrong type."
+  },
+  "invalid-value": {
+    title: "Field value is not allowed",
+    severity: "error",
+    why: "The CustomResourceDefinition restricts this value and the API server rejects anything else."
+  },
+  "missing-required": {
+    title: "Required field is missing",
+    severity: "error",
+    why: "The CustomResourceDefinition marks this field as required and the API server rejects the manifest without it."
+  }
+};
+var ENVELOPE = /* @__PURE__ */ new Set(["apiVersion", "kind", "metadata"]);
+function validateAgainst(data, schema2) {
+  const issues = [];
+  const root = { ...schema2, type: "object" };
+  walk2(data, root, "", issues, 0, true);
+  return issues;
+}
+function walk2(value, schema2, path6, issues, depth, top = false) {
+  if (depth > MAX_DEPTH || value === null || value === void 0) return;
+  const cel = schema2["x-kubernetes-validations"];
+  if (schema2.oneOf || schema2.anyOf || schema2.allOf || schema2.not || Array.isArray(cel)) {
+    const where = path6 === "" ? "The document" : `"${path6}"`;
+    issues.push({
+      code: "not-validated",
+      path: path6,
+      message: `${where} uses schema rules (oneOf, anyOf, allOf, not or CEL) that ManifestLens cannot check, so it was only partly validated.`
+    });
+    if (schema2.oneOf || schema2.anyOf || schema2.allOf || schema2.not) return;
+  }
+  const label2 = path6 === "" ? "the document" : `"${path6}"`;
+  if (schema2["x-kubernetes-int-or-string"]) {
+    if (typeof value !== "string" && !isInteger(value)) {
+      issues.push(typeIssue(path6, label2, "an integer or a string", value));
+    }
+    return;
+  }
+  if (schema2.type !== void 0 && !matchesType(value, schema2.type)) {
+    issues.push(typeIssue(path6, label2, article(schema2.type), value));
+    return;
+  }
+  if (schema2.enum && !schema2.enum.some((e) => e === value)) {
+    issues.push({
+      code: "invalid-value",
+      path: path6,
+      message: `${label2} is ${show(value)}, but only ${schema2.enum.map(show).join(", ")} are allowed.`
+    });
+  }
+  if (typeof value === "string") checkString(value, schema2, path6, label2, issues);
+  if (typeof value === "number") checkNumber(value, schema2, path6, label2, issues);
+  if (Array.isArray(value)) {
+    if (schema2.items) {
+      value.forEach(
+        (item, i) => walk2(item, schema2.items, `${path6}[${i}]`, issues, depth + 1)
+      );
+    }
+    return;
+  }
+  if (typeof value === "object")
+    walkObject(value, schema2, path6, issues, depth, top);
+}
+function walkObject(obj, schema2, path6, issues, depth, top) {
+  const props = schema2.properties;
+  const extra = schema2.additionalProperties;
+  const open2 = schema2["x-kubernetes-preserve-unknown-fields"] === true;
+  for (const name of schema2.required ?? []) {
+    if (obj[name] === void 0 && !(top && ENVELOPE.has(name))) {
+      issues.push({
+        code: "missing-required",
+        path: path6,
+        message: `${path6 === "" ? "The document" : `"${path6}"`} has no required field "${name}".`
+      });
+    }
+  }
+  for (const [key, child] of Object.entries(obj)) {
+    const childPath = path6 === "" ? key : `${path6}.${key}`;
+    if (top && ENVELOPE.has(key)) continue;
+    const known = props !== void 0 && Object.hasOwn(props, key) ? props[key] : void 0;
+    if (known) walk2(child, known, childPath, issues, depth + 1);
+    else if (typeof extra === "object") walk2(child, extra, childPath, issues, depth + 1);
+    else if (props !== void 0 && extra !== true && !open2) {
+      const near = nearest(key, Object.keys(props));
+      const to = near.length === 1 ? near[0] : void 0;
+      const renamable = to !== void 0 && /^[\w-]+$/.test(key) && !Object.hasOwn(obj, to);
+      issues.push({
+        code: "unknown-field",
+        path: childPath,
+        message: `"${childPath}" is not a field of this custom resource.${hint(near)}`,
+        ...renamable ? { rename: { parent: path6, from: key, to } } : {}
+      });
+    }
+  }
+}
+function checkString(s, schema2, path6, label2, issues) {
+  const bad = (message) => issues.push({ code: "invalid-value", path: path6, message });
+  if (schema2.minLength !== void 0 && s.length < schema2.minLength) {
+    bad(`${label2} must be at least ${schema2.minLength} characters long.`);
+  }
+  if (schema2.maxLength !== void 0 && s.length > schema2.maxLength) {
+    bad(`${label2} must be at most ${schema2.maxLength} characters long.`);
+  }
+  if (schema2.pattern !== void 0 && s.length <= 2e3) {
+    let re;
+    try {
+      re = new RegExp(schema2.pattern);
+    } catch {
+    }
+    if (re && !re.test(s))
+      bad(`${label2} is ${show(s)}, which does not match the pattern ${schema2.pattern}.`);
+  }
+}
+function checkNumber(n, schema2, path6, label2, issues) {
+  if (schema2.minimum !== void 0 && n < schema2.minimum) {
+    issues.push({
+      code: "invalid-value",
+      path: path6,
+      message: `${label2} is ${n}, below the minimum of ${schema2.minimum}.`
+    });
+  }
+  if (schema2.maximum !== void 0 && n > schema2.maximum) {
+    issues.push({
+      code: "invalid-value",
+      path: path6,
+      message: `${label2} is ${n}, above the maximum of ${schema2.maximum}.`
+    });
+  }
+}
+function isInteger(v) {
+  return typeof v === "number" && Number.isInteger(v);
+}
+function matchesType(v, type) {
+  switch (type) {
+    case "object":
+      return typeof v === "object" && !Array.isArray(v);
+    case "array":
+      return Array.isArray(v);
+    case "string":
+      return typeof v === "string";
+    case "integer":
+      return isInteger(v);
+    case "number":
+      return typeof v === "number";
+    case "boolean":
+      return typeof v === "boolean";
+    default:
+      return true;
+  }
+}
+function article(type) {
+  return /^[aeiou]/.test(type) ? `an ${type}` : `a ${type}`;
+}
+function describeType(v) {
+  return Array.isArray(v) ? "a list" : typeof v === "object" ? "a mapping" : article(typeof v);
+}
+function typeIssue(path6, label2, want, got) {
+  return {
+    code: "wrong-type",
+    path: path6,
+    message: `${label2} should be ${want}, but it is ${describeType(got)}.`
+  };
+}
+function show(v) {
+  return typeof v === "string" ? `"${v}"` : String(v);
+}
+function nearest(key, known) {
+  const lower = known.filter((k) => k.toLowerCase() === key.toLowerCase());
+  if (lower.length > 0) return lower;
+  const limit = key.length >= 5 ? 2 : 1;
+  let best = limit + 1;
+  let found = [];
+  for (const k of known) {
+    const d = editDistance(key, k);
+    if (d < best) {
+      best = d;
+      found = [k];
+    } else if (d === best && d <= limit) found.push(k);
+  }
+  return best <= limit ? found : [];
+}
+function hint(near) {
+  if (near.length === 0) return "";
+  const names = near.slice(0, 3).map((k) => `"${k}"`);
+  return ` Did you mean ${names.length === 1 ? names[0] : `${names.slice(0, -1).join(", ")} or ${names.at(-1)}`}?`;
+}
+function editDistance(a, b) {
+  const rows = [];
+  for (let i = 0; i <= a.length; i++) {
+    const row = [i];
+    for (let j = 1; j <= b.length; j++) {
+      if (i === 0) {
+        row[j] = j;
+        continue;
+      }
+      const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+      let d = Math.min(
+        (rows[i - 1]?.[j] ?? 0) + 1,
+        (row[j - 1] ?? 0) + 1,
+        (rows[i - 1]?.[j - 1] ?? 0) + cost
+      );
+      if (i > 1 && j > 1 && a[i - 1] === b[j - 2] && a[i - 2] === b[j - 1]) {
+        d = Math.min(d, (rows[i - 2]?.[j - 2] ?? 0) + 1);
+      }
+      row[j] = d;
+    }
+    rows.push(row);
+  }
+  return rows[a.length]?.[b.length] ?? 0;
+}
+
+// ../core/src/rules/evaluate.ts
+var POD_PREFIX = "$pod.";
+function isPodPath(path6) {
+  return path6.startsWith(POD_PREFIX);
+}
+function resolve(root, path6) {
+  const rel = isPodPath(path6) ? path6.slice(POD_PREFIX.length) : path6;
+  let current = [{ path: "", value: root }];
+  for (const segment of rel.split(".")) {
+    const each = segment.endsWith("[]");
+    const key = each ? segment.slice(0, -2) : segment;
+    const next = [];
+    for (const { path: prefix, value } of current) {
+      if (value === null || typeof value !== "object" || Array.isArray(value)) continue;
+      const child = value[key];
+      const childPath = prefix === "" ? key : `${prefix}.${key}`;
+      if (child === null || child === void 0) continue;
+      if (!each) {
+        next.push({ path: childPath, value: child });
+      } else if (Array.isArray(child)) {
+        child.forEach((item, i) => {
+          if (item !== null && item !== void 0)
+            next.push({ path: `${childPath}[${i}]`, value: item });
+        });
+      }
+    }
+    current = next;
+    if (current.length === 0) break;
+  }
+  return current;
+}
+function matchesFor(ctx, path6) {
+  return resolve(isPodPath(path6) ? ctx.pod : ctx.scope, path6);
+}
+function same(a, b) {
+  return JSON.stringify(a) === JSON.stringify(b);
+}
+function evaluate(cond, ctx) {
+  switch (cond.op) {
+    case "missing":
+      return matchesFor(ctx, cond.path).length === 0;
+    case "present":
+      return matchesFor(ctx, cond.path).length > 0;
+    case "equals":
+      return matchesFor(ctx, cond.path).some((m) => same(m.value, cond.value));
+    case "in":
+      return matchesFor(ctx, cond.path).some((m) => cond.values.some((v) => same(m.value, v)));
+    case "contains":
+      return matchesFor(ctx, cond.path).some(
+        (m) => Array.isArray(m.value) && m.value.some((v) => same(v, cond.value))
+      );
+    case "matches":
+      return matchesFor(ctx, cond.path).some(
+        (m) => (typeof m.value === "string" || typeof m.value === "number" || typeof m.value === "boolean") && cond.pattern.test(String(m.value))
+      );
+    case "all":
+      return cond.conditions.every((c) => evaluate(c, ctx));
+    case "any":
+      return cond.conditions.some((c) => evaluate(c, ctx));
+    case "not":
+      return !evaluate(cond.condition, ctx);
+    case "some":
+      return matchesFor(ctx, cond.path).some(
+        (m) => Array.isArray(m.value) && m.value.some(
+          (item) => item !== null && typeof item === "object" && !Array.isArray(item) && evaluate(cond.condition, { scope: item, pod: ctx.pod })
+        )
+      );
+  }
+}
+
+// ../core/src/rules/check.ts
+var SEVERITY_ORDER = { error: 0, warning: 1, info: 2 };
+function checkManifest(source, rules) {
+  return { documents: parseManifest(source).map((doc) => checkDocument(doc, rules)) };
+}
+function matchRules(doc, rules) {
+  const matches = [];
+  if (!doc.data || !doc.kind) return matches;
+  const kind = doc.kind;
+  const fieldsByPath = new Map(doc.fields.map((f) => [f.path, f]));
+  const podPath = Object.hasOwn(POD_SPEC_PATH, kind) ? POD_SPEC_PATH[kind] : void 0;
+  const podData = podPath === void 0 ? void 0 : get(doc.data, podPath);
+  matches.push(...crdMatches(doc, kind, rules, fieldsByPath));
+  for (const rule of rules) {
+    if (rule.crd || !rule.kinds.includes("*") && !rule.kinds.includes(kind)) continue;
+    for (const scope of rule.scopes) {
+      for (const instance of scopeInstances(scope, doc.data, podPath, podData)) {
+        const ctx = { scope: instance.data, pod: podData };
+        if (!evaluate(rule.when, ctx)) continue;
+        matches.push({
+          rule,
+          instance,
+          ctx,
+          finding: buildFinding(rule, instance, ctx, doc, podPath, fieldsByPath)
+        });
+      }
+    }
+  }
+  return matches;
+}
+function crdMatches(doc, kind, rules, fieldsByPath) {
+  if (!doc.data) return [];
+  const known = rules.filter((r) => r.crd && r.crd.kind === kind);
+  if (known.length === 0) return [];
+  const data = doc.data;
+  const here = known.find((r) => r.crd && `${r.crd.group}/${r.crd.version}` === doc.apiVersion);
+  const make = (rule, code2, issue2, message) => {
+    const info2 = CRD_ISSUES[code2];
+    const derived = {
+      ...rule,
+      id: `crd-${code2}`,
+      title: info2.title,
+      severity: info2.severity,
+      why: info2.why,
+      ...issue2?.rename ? {
+        autofix: {
+          risk: "medium",
+          summary: `Rename "${issue2.rename.from}" to "${issue2.rename.to}". The settings under it will start to apply, where before they were ignored.`,
+          set: [],
+          rename: issue2.rename
+        }
+      } : {}
+    };
+    const node = issue2 ? fieldsByPath.get(issue2.path) : void 0;
+    const inside = issue2 && !node && issue2.path !== "" ? doc.fields.filter((f) => f.path.startsWith(`${issue2.path}.`)).map((f) => f.line) : [];
+    return {
+      rule: derived,
+      instance: { path: issue2?.path ?? "", data },
+      ctx: { scope: data, pod: void 0 },
+      finding: {
+        ruleId: derived.id,
+        title: info2.title,
+        severity: info2.severity,
+        message,
+        why: info2.why,
+        line: node?.line ?? (inside.length > 0 ? Math.min(...inside) : doc.startLine),
+        ...node ? { path: node.path } : {}
+      }
+    };
+  };
+  if (!here?.crd) {
+    const versions = known.map((r) => `${r.crd?.group}/${r.crd?.version}`).join(", ");
+    const rule = known[0];
+    return [
+      make(
+        rule,
+        "unknown-version",
+        void 0,
+        `${kind} uses apiVersion "${doc.apiVersion ?? ""}", but its CustomResourceDefinition defines ${versions}.`
+      )
+    ];
+  }
+  return validateAgainst(data, here.crd.schema).map(
+    (issue2) => make(here, issue2.code, issue2, issue2.message)
+  );
+}
+function checkDocument(doc, rules) {
+  const checked = {
+    index: doc.index,
+    startLine: doc.startLine,
+    issues: doc.issues,
+    coverage: kindCoverage(doc.kind, doc.apiVersion, rules),
+    findings: matchRules(doc, rules).map((m) => m.finding),
+    ...doc.apiVersion !== void 0 ? { apiVersion: doc.apiVersion } : {},
+    ...doc.kind !== void 0 ? { kind: doc.kind } : {},
+    ...doc.name !== void 0 ? { name: doc.name } : {}
+  };
+  checked.findings.sort(
+    (a, b) => a.line - b.line || SEVERITY_ORDER[a.severity] - SEVERITY_ORDER[b.severity] || a.ruleId.localeCompare(b.ruleId)
+  );
+  return checked;
+}
+function get(data, path6) {
+  return resolve(data, path6)[0]?.value;
+}
+function scopeInstances(scope, data, podPath, podData) {
+  if (scope === "document") return [{ path: "", data }];
+  if (podPath === void 0 || podData === void 0) return [];
+  if (scope === "pod") return [{ path: podPath, data: podData }];
+  const list = scope === "container" ? "containers" : "initContainers";
+  const items = podData[list];
+  if (!Array.isArray(items)) return [];
+  return items.flatMap((item, i) => {
+    if (item === null || typeof item !== "object") return [];
+    const name = item.name;
+    return [
+      {
+        path: `${podPath}.${list}[${i}]`,
+        data: item,
+        ...typeof name === "string" ? { container: name } : {}
+      }
+    ];
+  });
+}
+function buildFinding(rule, instance, ctx, doc, podPath, fieldsByPath) {
+  let node;
+  let value;
+  for (const reportPath of rule.report) {
+    const base = isPodPath(reportPath) ? ctx.pod : ctx.scope;
+    const basePath = isPodPath(reportPath) ? podPath : instance.path;
+    const match3 = resolve(base, reportPath)[0];
+    if (!match3) continue;
+    const full = basePath ? `${basePath}.${match3.path}` : match3.path;
+    node = fieldsByPath.get(full);
+    value = match3.value;
+    if (node) break;
+  }
+  const line = node?.line ?? scopeLine(instance, doc);
+  const text2 = fill(rule.message, {
+    name: doc.name ?? "",
+    kind: doc.kind ?? "",
+    container: instance.container ?? "",
+    value: typeof value === "object" ? "" : String(value ?? "")
+  });
+  return {
+    ruleId: rule.id,
+    title: rule.title,
+    severity: rule.severity,
+    message: text2,
+    line,
+    ...rule.why !== void 0 ? { why: rule.why } : {},
+    ...rule.fix !== void 0 ? { fix: rule.fix } : {},
+    ...node ? { path: node.path } : {}
+  };
+}
+function scopeLine(instance, doc) {
+  if (instance.path === "") return doc.startLine;
+  const prefix = `${instance.path}.`;
+  const lines = doc.fields.filter((f) => f.path.startsWith(prefix)).map((f) => f.line);
+  const own = doc.fields.find((f) => f.path === instance.path);
+  return lines.length > 0 ? Math.min(...lines) : own?.line ?? doc.startLine;
+}
+function fill(template, values) {
+  return template.replace(/\{(\w+)\}/g, (whole, key) => values[key] ?? whole);
+}
+
 // ../core/src/rules/bundled.ts
 var bundledRuleSources = {
   "api.yaml": `# Rules about the manifest itself rather than one kind.
@@ -28059,477 +28886,6 @@ fix: Use a LoadBalancer Service or an Ingress. If you must keep externalIPs, res
 `
 };
 
-// ../core/src/rules/load.ts
-var import_yaml2 = __toESM(require_dist(), 1);
-var RuleError = class extends Error {
-  constructor(message) {
-    super(message);
-    this.name = "RuleError";
-  }
-};
-var SEVERITIES = ["info", "warning", "error"];
-var SCOPES = ["document", "pod", "container", "initContainer"];
-var RULE_KEYS = [
-  "id",
-  "title",
-  "severity",
-  "kinds",
-  "scope",
-  "when",
-  "report",
-  "message",
-  "why",
-  "fix",
-  "autofix"
-];
-function parseRules(text2, origin = "rules") {
-  const rules = [];
-  for (const doc of (0, import_yaml2.parseAllDocuments)(text2)) {
-    if (doc.errors.length > 0) {
-      throw new RuleError(`${origin}: ${doc.errors[0]?.message.split("\n")[0] ?? "invalid YAML"}`);
-    }
-    if (doc.contents === null) continue;
-    if (!(0, import_yaml2.isMap)(doc.contents)) {
-      throw new RuleError(`${origin}: each rule must be a mapping.`);
-    }
-    const data = doc.toJS();
-    if (data === null || data === void 0) continue;
-    rules.push(toRule(data, origin, rules.length + 1));
-  }
-  return rules;
-}
-function toRule(raw, origin, position) {
-  const label2 = typeof raw.id === "string" ? `${origin}: rule "${raw.id}"` : `${origin}: rule #${position}`;
-  const fail = (msg) => {
-    throw new RuleError(`${label2}: ${msg}`);
-  };
-  for (const key of Object.keys(raw)) {
-    if (!RULE_KEYS.includes(key)) fail(`unknown key "${key}".`);
-  }
-  const id = requiredString(raw, "id", fail);
-  if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(id)) fail('"id" must be lowercase words joined by dashes.');
-  const title = requiredString(raw, "title", fail);
-  const message = requiredString(raw, "message", fail);
-  const severity = raw.severity;
-  if (!SEVERITIES.includes(severity)) {
-    fail(`"severity" must be one of ${SEVERITIES.join(", ")}.`);
-  }
-  const kinds = stringList(raw.kinds);
-  if (!kinds || kinds.length === 0) fail('"kinds" must be a non-empty list of strings.');
-  const scopeRaw = raw.scope === void 0 ? ["document"] : stringList(raw.scope);
-  if (!scopeRaw || scopeRaw.length === 0 || scopeRaw.some((s) => !SCOPES.includes(s))) {
-    fail(`"scope" must be one or a list of ${SCOPES.join(", ")}.`);
-  }
-  const reportRaw = raw.report === void 0 ? [] : stringList(raw.report);
-  if (!reportRaw) fail('"report" must be a path or a list of paths.');
-  if (raw.when === void 0) fail('"when" is required.');
-  const when = toCondition(raw.when, fail);
-  const rule = {
-    id,
-    title,
-    severity,
-    kinds,
-    scopes: scopeRaw,
-    when,
-    report: reportRaw,
-    message,
-    origin
-  };
-  for (const key of ["why", "fix"]) {
-    const value = raw[key];
-    if (value === void 0) continue;
-    if (typeof value !== "string") fail(`"${key}" must be a string.`);
-    rule[key] = value.trim();
-  }
-  if (raw.autofix !== void 0) rule.autofix = toFixSpec(raw.autofix, fail);
-  return rule;
-}
-var FIX_RISKS = ["low", "medium", "high"];
-var FIX_KEYS = ["risk", "summary", "requires", "blocked", "set"];
-var FIX_PATH = /^[A-Za-z0-9_-]+(\.[A-Za-z0-9_-]+)*$/;
-function toFixSpec(raw, fail) {
-  if (raw === null || typeof raw !== "object" || Array.isArray(raw)) {
-    return fail('"autofix" must be a mapping.');
-  }
-  const obj = raw;
-  for (const key of Object.keys(obj)) {
-    if (!FIX_KEYS.includes(key)) fail(`unknown key "${key}" in "autofix".`);
-  }
-  if (!FIX_RISKS.includes(obj.risk)) {
-    fail(`"autofix.risk" must be one of ${FIX_RISKS.join(", ")}.`);
-  }
-  if (typeof obj.summary !== "string" || obj.summary.trim() === "") {
-    fail('"autofix.summary" is required.');
-  }
-  const summary2 = obj.summary.trim();
-  if (obj.blocked !== void 0 && (typeof obj.blocked !== "string" || obj.blocked.trim() === "")) {
-    fail('"autofix.blocked" must be a non-empty string.');
-  }
-  const set = obj.set;
-  if (set === null || typeof set !== "object" || Array.isArray(set) || Object.keys(set).length === 0) {
-    return fail('"autofix.set" must be a non-empty mapping of path to value.');
-  }
-  const sets = Object.entries(set).map(([path6, value]) => {
-    if (!FIX_PATH.test(path6)) {
-      return fail(`"autofix.set" path "${path6}" must be plain dotted keys, with no [] or $pod.`);
-    }
-    const isParam = value !== null && typeof value === "object" && !Array.isArray(value) && "$param" in value;
-    if (!isParam) return { path: path6, value };
-    const { $param: name, pattern, ...extra } = value;
-    if (Object.keys(extra).length > 0 || typeof name !== "string" || !/^\w+$/.test(name) || pattern !== void 0 && typeof pattern !== "string") {
-      return fail(
-        `"autofix.set" value for "${path6}" must be { $param: name } with an optional "pattern".`
-      );
-    }
-    if (pattern === void 0) return { path: path6, param: name };
-    try {
-      return { path: path6, param: name, pattern: new RegExp(pattern) };
-    } catch {
-      return fail(`invalid regular expression "${pattern}" for "${path6}".`);
-    }
-  });
-  const paths = sets.map((s) => s.path);
-  for (const a of paths) {
-    if (paths.some((b) => b !== a && b.startsWith(`${a}.`))) {
-      fail(`"autofix.set" paths "${a}" and a path below it cannot both be set.`);
-    }
-  }
-  return {
-    risk: obj.risk,
-    summary: summary2,
-    ...obj.requires !== void 0 ? { requires: toCondition(obj.requires, fail) } : {},
-    ...obj.blocked !== void 0 ? { blockedMessage: obj.blocked.trim() } : {},
-    set: sets
-  };
-}
-function requiredString(raw, key, fail) {
-  const value = raw[key];
-  if (typeof value !== "string" || value.trim() === "") fail(`"${key}" is required.`);
-  return value.trim();
-}
-function stringList(value) {
-  if (typeof value === "string") return [value];
-  if (Array.isArray(value) && value.every((v) => typeof v === "string")) return value;
-  return void 0;
-}
-function toCondition(raw, fail) {
-  if (raw === null || typeof raw !== "object" || Array.isArray(raw)) {
-    return fail("a condition must be a mapping such as { missing: some.path }.");
-  }
-  const entries = Object.entries(raw);
-  if (entries.length !== 1) return fail("a condition must have exactly one operator.");
-  const [op, arg] = entries[0];
-  switch (op) {
-    case "missing":
-    case "present":
-      if (typeof arg !== "string") return fail(`"${op}" takes a path.`);
-      return { op, path: arg };
-    case "equals":
-    case "contains":
-    case "matches":
-    case "in": {
-      const [path6, value] = singleEntry(op, arg, fail);
-      if (op === "matches") {
-        if (typeof value !== "string") return fail('"matches" takes a regular expression string.');
-        try {
-          const insensitive = value.startsWith("(?i)");
-          return {
-            op,
-            path: path6,
-            pattern: new RegExp(insensitive ? value.slice(4) : value, insensitive ? "i" : "")
-          };
-        } catch {
-          return fail(`invalid regular expression "${value}".`);
-        }
-      }
-      if (op === "in") {
-        if (!Array.isArray(value)) return fail('"in" takes a list of values.');
-        return { op, path: path6, values: value };
-      }
-      return { op, path: path6, value };
-    }
-    case "all":
-    case "any":
-      if (!Array.isArray(arg) || arg.length === 0) return fail(`"${op}" takes a non-empty list.`);
-      return { op, conditions: arg.map((c) => toCondition(c, fail)) };
-    case "not":
-      return { op: "not", condition: toCondition(arg, fail) };
-    case "some": {
-      const obj = arg;
-      if (obj === null || typeof obj !== "object" || Array.isArray(obj) || typeof obj.in !== "string" || obj.where === void 0 || Object.keys(obj).length !== 2) {
-        return fail('"some" takes { in: path-to-a-list, where: condition }.');
-      }
-      return { op: "some", path: obj.in, condition: toCondition(obj.where, fail) };
-    }
-    default:
-      return fail(`unknown operator "${op}".`);
-  }
-}
-function singleEntry(op, arg, fail) {
-  if (arg === null || typeof arg !== "object" || Array.isArray(arg)) {
-    return fail(`"${op}" takes a single { path: value } pair.`);
-  }
-  const entries = Object.entries(arg);
-  if (entries.length !== 1) return fail(`"${op}" takes exactly one { path: value } pair.`);
-  return entries[0];
-}
-
-// ../core/src/rules/coverage.ts
-function isCustomResource(apiVersion) {
-  const group = apiVersion?.includes("/") ? apiVersion.slice(0, apiVersion.indexOf("/")) : "";
-  return group.includes(".") && !/^([a-z0-9-]+\.)*k8s\.io$/.test(group);
-}
-function distance(a, b) {
-  let prev = Array.from({ length: b.length + 1 }, (_, i) => i);
-  for (let i = 1; i <= a.length; i++) {
-    const row = [i];
-    for (let j = 1; j <= b.length; j++) {
-      const cost = a[i - 1]?.toLowerCase() === b[j - 1]?.toLowerCase() ? 0 : 1;
-      row[j] = Math.min((prev[j] ?? 0) + 1, (row[j - 1] ?? 0) + 1, (prev[j - 1] ?? 0) + cost);
-    }
-    prev = row;
-  }
-  return prev[b.length] ?? 0;
-}
-function suggestKind(kind, rules) {
-  const known = [.../* @__PURE__ */ new Set([...supportedKinds(), ...checkedKinds(rules)])];
-  let best;
-  for (const k of known) {
-    const prefix = k.length >= 3 && kind.toLowerCase().startsWith(k.toLowerCase());
-    const d = prefix ? 1 : distance(kind, k);
-    if (!best || d < best.d) best = { kind: k, d };
-  }
-  return best && best.d <= Math.max(2, Math.floor(kind.length / 3)) ? best.kind : void 0;
-}
-function checkedKinds(rules) {
-  const kinds = new Set(Object.keys(POD_SPEC_PATH));
-  for (const rule of rules) for (const kind of rule.kinds) if (kind !== "*") kinds.add(kind);
-  return [...kinds].sort();
-}
-function kindCoverage(kind, apiVersion, rules) {
-  if (kind === void 0) {
-    return describe(
-      "unchecked",
-      'No "kind" field',
-      "Without a kind ManifestLens cannot tell what this is, so nothing was checked."
-    );
-  }
-  if (Object.hasOwn(POD_SPEC_PATH, kind) || rules.some((r) => r.kinds.includes(kind))) {
-    return { level: "checked" };
-  }
-  if (hasDocsFor(kind)) {
-    return describe(
-      "explain-only",
-      `No rules for ${kind}`,
-      `ManifestLens explains ${kind} fields, but no rule checks it.`
-    );
-  }
-  if (isCustomResource(apiVersion)) {
-    return describe(
-      "unchecked",
-      `Custom resource ${kind} (${apiVersion})`,
-      "ManifestLens has no rules for custom resources, so it was not checked."
-    );
-  }
-  return describe(
-    "unchecked",
-    `Unknown kind "${kind}"`,
-    "ManifestLens has no rules for it, so it was not checked.",
-    suggestKind(kind, rules)
-  );
-}
-function describe(level, headline2, detail, suggestion) {
-  const note = '"No findings" does not mean it is safe.';
-  const hint = suggestion ? `Did you mean "${suggestion}"?` : void 0;
-  return {
-    level,
-    headline: headline2,
-    detail,
-    note,
-    ...suggestion !== void 0 ? { suggestion } : {},
-    message: [`${headline2}.`, detail, hint, note].filter(Boolean).join(" ")
-  };
-}
-
-// ../core/src/rules/evaluate.ts
-var POD_PREFIX = "$pod.";
-function isPodPath(path6) {
-  return path6.startsWith(POD_PREFIX);
-}
-function resolve(root, path6) {
-  const rel = isPodPath(path6) ? path6.slice(POD_PREFIX.length) : path6;
-  let current = [{ path: "", value: root }];
-  for (const segment of rel.split(".")) {
-    const each = segment.endsWith("[]");
-    const key = each ? segment.slice(0, -2) : segment;
-    const next = [];
-    for (const { path: prefix, value } of current) {
-      if (value === null || typeof value !== "object" || Array.isArray(value)) continue;
-      const child = value[key];
-      const childPath = prefix === "" ? key : `${prefix}.${key}`;
-      if (child === null || child === void 0) continue;
-      if (!each) {
-        next.push({ path: childPath, value: child });
-      } else if (Array.isArray(child)) {
-        child.forEach((item, i) => {
-          if (item !== null && item !== void 0)
-            next.push({ path: `${childPath}[${i}]`, value: item });
-        });
-      }
-    }
-    current = next;
-    if (current.length === 0) break;
-  }
-  return current;
-}
-function matchesFor(ctx, path6) {
-  return resolve(isPodPath(path6) ? ctx.pod : ctx.scope, path6);
-}
-function same(a, b) {
-  return JSON.stringify(a) === JSON.stringify(b);
-}
-function evaluate(cond, ctx) {
-  switch (cond.op) {
-    case "missing":
-      return matchesFor(ctx, cond.path).length === 0;
-    case "present":
-      return matchesFor(ctx, cond.path).length > 0;
-    case "equals":
-      return matchesFor(ctx, cond.path).some((m) => same(m.value, cond.value));
-    case "in":
-      return matchesFor(ctx, cond.path).some((m) => cond.values.some((v) => same(m.value, v)));
-    case "contains":
-      return matchesFor(ctx, cond.path).some(
-        (m) => Array.isArray(m.value) && m.value.some((v) => same(v, cond.value))
-      );
-    case "matches":
-      return matchesFor(ctx, cond.path).some(
-        (m) => (typeof m.value === "string" || typeof m.value === "number" || typeof m.value === "boolean") && cond.pattern.test(String(m.value))
-      );
-    case "all":
-      return cond.conditions.every((c) => evaluate(c, ctx));
-    case "any":
-      return cond.conditions.some((c) => evaluate(c, ctx));
-    case "not":
-      return !evaluate(cond.condition, ctx);
-    case "some":
-      return matchesFor(ctx, cond.path).some(
-        (m) => Array.isArray(m.value) && m.value.some(
-          (item) => item !== null && typeof item === "object" && !Array.isArray(item) && evaluate(cond.condition, { scope: item, pod: ctx.pod })
-        )
-      );
-  }
-}
-
-// ../core/src/rules/check.ts
-var SEVERITY_ORDER = { error: 0, warning: 1, info: 2 };
-function checkManifest(source, rules) {
-  return { documents: parseManifest(source).map((doc) => checkDocument(doc, rules)) };
-}
-function matchRules(doc, rules) {
-  const matches = [];
-  if (!doc.data || !doc.kind) return matches;
-  const kind = doc.kind;
-  const fieldsByPath = new Map(doc.fields.map((f) => [f.path, f]));
-  const podPath = Object.hasOwn(POD_SPEC_PATH, kind) ? POD_SPEC_PATH[kind] : void 0;
-  const podData = podPath === void 0 ? void 0 : get(doc.data, podPath);
-  for (const rule of rules) {
-    if (!rule.kinds.includes("*") && !rule.kinds.includes(kind)) continue;
-    for (const scope of rule.scopes) {
-      for (const instance of scopeInstances(scope, doc.data, podPath, podData)) {
-        const ctx = { scope: instance.data, pod: podData };
-        if (!evaluate(rule.when, ctx)) continue;
-        matches.push({
-          rule,
-          instance,
-          ctx,
-          finding: buildFinding(rule, instance, ctx, doc, podPath, fieldsByPath)
-        });
-      }
-    }
-  }
-  return matches;
-}
-function checkDocument(doc, rules) {
-  const checked = {
-    index: doc.index,
-    startLine: doc.startLine,
-    issues: doc.issues,
-    coverage: kindCoverage(doc.kind, doc.apiVersion, rules),
-    findings: matchRules(doc, rules).map((m) => m.finding),
-    ...doc.apiVersion !== void 0 ? { apiVersion: doc.apiVersion } : {},
-    ...doc.kind !== void 0 ? { kind: doc.kind } : {},
-    ...doc.name !== void 0 ? { name: doc.name } : {}
-  };
-  checked.findings.sort(
-    (a, b) => a.line - b.line || SEVERITY_ORDER[a.severity] - SEVERITY_ORDER[b.severity] || a.ruleId.localeCompare(b.ruleId)
-  );
-  return checked;
-}
-function get(data, path6) {
-  return resolve(data, path6)[0]?.value;
-}
-function scopeInstances(scope, data, podPath, podData) {
-  if (scope === "document") return [{ path: "", data }];
-  if (podPath === void 0 || podData === void 0) return [];
-  if (scope === "pod") return [{ path: podPath, data: podData }];
-  const list = scope === "container" ? "containers" : "initContainers";
-  const items = podData[list];
-  if (!Array.isArray(items)) return [];
-  return items.flatMap((item, i) => {
-    if (item === null || typeof item !== "object") return [];
-    const name = item.name;
-    return [
-      {
-        path: `${podPath}.${list}[${i}]`,
-        data: item,
-        ...typeof name === "string" ? { container: name } : {}
-      }
-    ];
-  });
-}
-function buildFinding(rule, instance, ctx, doc, podPath, fieldsByPath) {
-  let node;
-  let value;
-  for (const reportPath of rule.report) {
-    const base = isPodPath(reportPath) ? ctx.pod : ctx.scope;
-    const basePath = isPodPath(reportPath) ? podPath : instance.path;
-    const match3 = resolve(base, reportPath)[0];
-    if (!match3) continue;
-    const full = basePath ? `${basePath}.${match3.path}` : match3.path;
-    node = fieldsByPath.get(full);
-    value = match3.value;
-    if (node) break;
-  }
-  const line = node?.line ?? scopeLine(instance, doc);
-  const text2 = fill(rule.message, {
-    name: doc.name ?? "",
-    kind: doc.kind ?? "",
-    container: instance.container ?? "",
-    value: typeof value === "object" ? "" : String(value ?? "")
-  });
-  return {
-    ruleId: rule.id,
-    title: rule.title,
-    severity: rule.severity,
-    message: text2,
-    line,
-    ...rule.why !== void 0 ? { why: rule.why } : {},
-    ...rule.fix !== void 0 ? { fix: rule.fix } : {},
-    ...node ? { path: node.path } : {}
-  };
-}
-function scopeLine(instance, doc) {
-  if (instance.path === "") return doc.startLine;
-  const prefix = `${instance.path}.`;
-  const lines = doc.fields.filter((f) => f.path.startsWith(prefix)).map((f) => f.line);
-  const own = doc.fields.find((f) => f.path === instance.path);
-  return lines.length > 0 ? Math.min(...lines) : own?.line ?? doc.startLine;
-}
-function fill(template, values) {
-  return template.replace(/\{(\w+)\}/g, (whole, key) => values[key] ?? whole);
-}
-
 // ../core/src/rules/index.ts
 function loadBundledRules() {
   return Object.entries(bundledRuleSources).flatMap(([file, text2]) => parseRules(text2, file));
@@ -28635,7 +28991,7 @@ function unifiedDiff(oldText, newText, oldLabel = "a/manifest.yaml", newLabel = 
 }
 
 // ../core/src/fix/edit.ts
-var import_yaml3 = __toESM(require_dist(), 1);
+var import_yaml4 = __toESM(require_dist(), 1);
 var INDENT = 2;
 function toSteps(...paths) {
   const steps = [];
@@ -28660,17 +29016,17 @@ function setInSource(source, documentIndex, steps, value) {
   let node = tree.contents;
   for (let i = 0; i < steps.length; i++) {
     const step = steps[i];
-    if ((0, import_yaml3.isAlias)(node)) return unsupported("a list item on the path is a YAML alias");
+    if ((0, import_yaml4.isAlias)(node)) return unsupported("a list item on the path is a YAML alias");
     const last = i === steps.length - 1;
     if (typeof step === "number") {
-      if (!(0, import_yaml3.isSeq)(node)) return unsupported(`expected a list at step ${i + 1}`);
+      if (!(0, import_yaml4.isSeq)(node)) return unsupported(`expected a list at step ${i + 1}`);
       node = node.items[step];
       if (node === void 0) return unsupported("a list item on the path does not exist");
       if (last) return unsupported("cannot replace a whole list item");
       continue;
     }
-    if (!(0, import_yaml3.isMap)(node)) return unsupported(`expected a mapping at "${step}"`);
-    const pair = node.items.find((p) => (0, import_yaml3.isScalar)(p.key) && String(p.key.value) === step);
+    if (!(0, import_yaml4.isMap)(node)) return unsupported(`expected a mapping at "${step}"`);
+    const pair = node.items.find((p) => (0, import_yaml4.isScalar)(p.key) && String(p.key.value) === step);
     if (!pair) {
       const rest = steps.slice(i);
       if (rest.some((s) => typeof s === "number")) {
@@ -28678,7 +29034,7 @@ function setInSource(source, documentIndex, steps, value) {
       }
       return insertKeys(source, node, rest, value, eol);
     }
-    if ((0, import_yaml3.isAlias)(pair.value)) {
+    if ((0, import_yaml4.isAlias)(pair.value)) {
       if (last) return unsupported("the value is a YAML alias");
       return overrideAlias(source, tree, node, pair, pair.value, steps.slice(i + 1), value, eol);
     }
@@ -28695,9 +29051,34 @@ function setInSource(source, documentIndex, steps, value) {
   }
   return unsupported("empty path");
 }
+function renameKeyInSource(source, documentIndex, steps, from, to) {
+  const tree = parseManifestWithTree(source)[documentIndex]?.tree;
+  if (!tree) return unsupported("the document is no longer there");
+  let node = tree.contents;
+  for (const step of steps) {
+    if ((0, import_yaml4.isAlias)(node)) return unsupported("a YAML alias is on the path");
+    if (typeof step === "number") {
+      if (!(0, import_yaml4.isSeq)(node)) return unsupported("expected a list on the path");
+      node = node.items[step];
+    } else {
+      if (!(0, import_yaml4.isMap)(node)) return unsupported(`expected a mapping at "${step}"`);
+      node = node.items.find((p) => (0, import_yaml4.isScalar)(p.key) && String(p.key.value) === step)?.value;
+    }
+    if (node === void 0) return unsupported("the path does not exist");
+  }
+  if (!(0, import_yaml4.isMap)(node)) return unsupported("the parent is not a mapping");
+  const keys = node.items.filter((p) => (0, import_yaml4.isScalar)(p.key)).map((p) => String(p.key.value));
+  if (keys.includes(to)) return unsupported(`"${to}" already exists there`);
+  const pair = node.items.find((p) => (0, import_yaml4.isScalar)(p.key) && String(p.key.value) === from);
+  const range2 = pair && (0, import_yaml4.isScalar)(pair.key) ? pair.key.range : void 0;
+  if (!range2) return unsupported("cannot locate the key");
+  const old = source.slice(range2[0], range2[1]);
+  const quote = old.startsWith('"') || old.startsWith("'") ? old[0] : "";
+  return ok(source, range2[0], range2[1], `${quote}${to}${quote}`);
+}
 function isEmpty(node) {
-  if ((0, import_yaml3.isScalar)(node)) return node.value === null || node.value === void 0;
-  return (0, import_yaml3.isMap)(node) && node.flow === true && node.items.length === 0;
+  if ((0, import_yaml4.isScalar)(node)) return node.value === null || node.value === void 0;
+  return (0, import_yaml4.isMap)(node) && node.flow === true && node.items.length === 0;
 }
 function lineStart(source, offset) {
   return source.lastIndexOf("\n", offset - 1) + 1;
@@ -28713,7 +29094,7 @@ function indentOf(source, offset) {
 function renderBlock(keys, value, indent) {
   let nested = value;
   for (const key of [...keys].reverse()) nested = { [key]: nested };
-  const text2 = (0, import_yaml3.stringify)(nested, { indent: INDENT, lineWidth: 0 }).replace(/\n$/, "");
+  const text2 = (0, import_yaml4.stringify)(nested, { indent: INDENT, lineWidth: 0 }).replace(/\n$/, "");
   return text2.split("\n").map((line) => " ".repeat(indent) + line);
 }
 function isCollection(value) {
@@ -28721,12 +29102,12 @@ function isCollection(value) {
 }
 function isJsonStyle(map) {
   const key = map.items[0]?.key;
-  return (0, import_yaml3.isScalar)(key) && key.type === "QUOTE_DOUBLE";
+  return (0, import_yaml4.isScalar)(key) && key.type === "QUOTE_DOUBLE";
 }
 function renderFlowPairs(keys, value, json) {
   let nested = value;
   for (const key of [...keys].reverse()) nested = { [key]: nested };
-  const text2 = (0, import_yaml3.stringify)(nested, {
+  const text2 = (0, import_yaml4.stringify)(nested, {
     collectionStyle: "flow",
     lineWidth: 0,
     flowCollectionPadding: false,
@@ -28735,7 +29116,7 @@ function renderFlowPairs(keys, value, json) {
   return text2.slice(1, -1);
 }
 function renderFlowValue(value, json) {
-  return (0, import_yaml3.stringify)(value, {
+  return (0, import_yaml4.stringify)(value, {
     collectionStyle: "flow",
     lineWidth: 0,
     flowCollectionPadding: false,
@@ -28745,7 +29126,7 @@ function renderFlowValue(value, json) {
 function insertFlowKeys(source, map, rest, value, eol) {
   const first = map.items[0];
   const lastPair = map.items[map.items.length - 1];
-  if (!first || !lastPair || !(0, import_yaml3.isScalar)(first.key) || !first.key.range) {
+  if (!first || !lastPair || !(0, import_yaml4.isScalar)(first.key) || !first.key.range) {
     return unsupported("the mapping has no keys to align with");
   }
   const keyEnd = lastPair.key.range?.[1] ?? 0;
@@ -28763,19 +29144,19 @@ function overrideAlias(source, tree, parent, pair, alias, rest, value, eol) {
   }
   const keys = rest;
   const target2 = alias.resolve(tree);
-  if (!(0, import_yaml3.isMap)(target2)) return unsupported("the YAML alias is not a mapping");
-  const inherited = target2.items.some((p) => (0, import_yaml3.isScalar)(p.key) && String(p.key.value) === keys[0]);
+  if (!(0, import_yaml4.isMap)(target2)) return unsupported("the YAML alias is not a mapping");
+  const inherited = target2.items.some((p) => (0, import_yaml4.isScalar)(p.key) && String(p.key.value) === keys[0]);
   if (keys.length > 1 && inherited) {
     return unsupported(
       `"${keys[0]}" comes from a YAML alias and would be replaced as a whole, not merged`
     );
   }
-  if (!alias.range || !(0, import_yaml3.isScalar)(pair.key) || !pair.key.range) {
+  if (!alias.range || !(0, import_yaml4.isScalar)(pair.key) || !pair.key.range) {
     return unsupported("cannot locate the alias");
   }
   const [start, end] = alias.range;
   const ref = source.slice(start, end);
-  if ((0, import_yaml3.isMap)(parent) && parent.flow) {
+  if ((0, import_yaml4.isMap)(parent) && parent.flow) {
     const pairs = renderFlowPairs(keys, value, isJsonStyle(parent));
     return ok(source, start, end, `{<<: ${ref}, ${pairs}}`);
   }
@@ -28788,7 +29169,7 @@ function overrideAlias(source, tree, parent, pair, alias, rest, value, eol) {
 function insertKeys(source, map, rest, value, eol) {
   if (map.flow) return insertFlowKeys(source, map, rest, value, eol);
   const first = map.items[0];
-  if (!first || !(0, import_yaml3.isScalar)(first.key) || !first.key.range) {
+  if (!first || !(0, import_yaml4.isScalar)(first.key) || !first.key.range) {
     return unsupported("the mapping has no keys to align with");
   }
   const indent = indentOf(source, first.key.range[0]);
@@ -28806,10 +29187,10 @@ function replaceValue(source, parent, pair, value, eol) {
   if (old === null || old === void 0 || isEmpty(old)) {
     return fillEmpty(source, parent, pair, [], value, eol);
   }
-  if (!(0, import_yaml3.isScalar)(old) || !old.range) return unsupported("the existing value is a list or mapping");
+  if (!(0, import_yaml4.isScalar)(old) || !old.range) return unsupported("the existing value is a list or mapping");
   if (isCollection(value)) return unsupported("cannot merge into an existing value");
-  const json = (0, import_yaml3.isMap)(parent) && parent.flow === true && isJsonStyle(parent);
-  const text2 = (0, import_yaml3.stringify)(value, {
+  const json = (0, import_yaml4.isMap)(parent) && parent.flow === true && isJsonStyle(parent);
+  const text2 = (0, import_yaml4.stringify)(value, {
     lineWidth: 0,
     ...json ? { defaultStringType: "QUOTE_DOUBLE" } : {}
   }).replace(/\n$/, "");
@@ -28823,9 +29204,9 @@ function fillEmpty(source, parent, pair, rest, value, eol) {
   const colon = source.indexOf(":", keyRange[1]);
   if (colon === -1) return unsupported("cannot locate the key");
   const indent = indentOf(source, keyRange[0]);
-  const flow = pair.value && (0, import_yaml3.isMap)(pair.value) && pair.value.range ? pair.value.range : void 0;
+  const flow = pair.value && (0, import_yaml4.isMap)(pair.value) && pair.value.range ? pair.value.range : void 0;
   const end = flow ? flow[1] : colon + 1;
-  if ((0, import_yaml3.isMap)(parent) && parent.flow) {
+  if ((0, import_yaml4.isMap)(parent) && parent.flow) {
     if (!flow) return unsupported("the key has no value to fill inside a { flow } mapping");
     const json = isJsonStyle(parent);
     const text2 = rest.length > 0 ? `{${renderFlowPairs(rest, value, json)}}` : renderFlowValue(value, json);
@@ -28839,13 +29220,13 @@ function fillEmpty(source, parent, pair, rest, value, eol) {
     return unsupported("the key has an unusual value");
   }
   if (rest.length === 0 && !isCollection(value)) {
-    const text2 = (0, import_yaml3.stringify)(value, { lineWidth: 0 }).replace(/\n$/, "");
+    const text2 = (0, import_yaml4.stringify)(value, { lineWidth: 0 }).replace(/\n$/, "");
     return ok(source, colon + 1, end, ` ${text2}`);
   }
   let lines;
   if (rest.length > 0) lines = renderBlock(rest, value, indent + INDENT);
   else {
-    lines = (0, import_yaml3.stringify)(value, { indent: INDENT, lineWidth: 0 }).replace(/\n$/, "").split("\n").map((l) => " ".repeat(indent + INDENT) + l);
+    lines = (0, import_yaml4.stringify)(value, { indent: INDENT, lineWidth: 0 }).replace(/\n$/, "").split("\n").map((l) => " ".repeat(indent + INDENT) + l);
   }
   const at = flow ? flow[1] : lineEnd(source, end);
   return ok(source, flow ? colon + 1 : at, flow ? flow[1] : at, `${eol}${lines.join(eol)}`);
@@ -28984,6 +29365,13 @@ function setDeep(root, steps, value) {
     node = node[step];
   });
 }
+function renameDeep(root, steps, from, to) {
+  let node = root;
+  for (const step of steps) node = node?.[step];
+  if (node === void 0 || node === null || typeof node !== "object") return;
+  node[to] = node[from];
+  Reflect.deleteProperty(node, from);
+}
 function originalLine(source, text2, line) {
   if (source === text2) return line;
   let before = 0;
@@ -29079,6 +29467,32 @@ function attempt(text2, state, candidate, rules, ctx) {
       spec.blockedMessage ?? "The surrounding settings make this fix unsafe or ambiguous."
     );
   }
+  if (spec.rename) {
+    const { parent, from, to } = spec.rename;
+    const result = renameKeyInSource(text2, candidate.documentIndex, toSteps(parent), from, to);
+    if (!result.ok)
+      return skip("unsupported-layout", `Cannot rename this safely: ${result.detail}.`);
+    const moved = (want) => renameDeep(want, toSteps(parent), from, to);
+    const problem2 = verifyStep(text2, result.text, state, candidate, rules, moved);
+    if (problem2) return skip("validation-failed", problem2);
+    return {
+      text: result.text,
+      applied: {
+        ruleId: rule.id,
+        risk: spec.risk,
+        summary: spec.summary,
+        target: where,
+        line: reported,
+        changes: [
+          {
+            path: parent === "" ? "the document" : parent,
+            before: `key "${from}"`,
+            after: `key "${to}"`
+          }
+        ]
+      }
+    };
+  }
   const resolved = resolveValues(spec, ctx.params);
   if ("reason" in resolved) return skip(resolved.reason, resolved.detail);
   const changes = [];
@@ -29110,7 +29524,9 @@ function attempt(text2, state, candidate, rules, ctx) {
     next = result.text;
   }
   if (next === text2) return skip("precondition-failed", "The field already has this value.");
-  const problem = verifyStep(text2, next, state, candidate, rules, edits);
+  const problem = verifyStep(text2, next, state, candidate, rules, (want) => {
+    for (const e of edits) setDeep(want, e.steps, e.value);
+  });
   if (problem) return skip("validation-failed", problem);
   return {
     text: next,
@@ -29124,7 +29540,7 @@ function attempt(text2, state, candidate, rules, ctx) {
     }
   };
 }
-function verifyStep(before, after, state, candidate, rules, edits) {
+function verifyStep(before, after, state, candidate, rules, change) {
   const parsed = parseManifestWithTree(after);
   if (parsed.length !== state.documents.length) return "The number of documents changed.";
   if (parsed.reduce((n, d) => n + d.manifest.issues.length, 0) > state.issues) {
@@ -29135,7 +29551,7 @@ function verifyStep(before, after, state, candidate, rules, edits) {
     let want = expected[i].manifest.data;
     if (i === candidate.documentIndex) {
       want = want === void 0 ? want : JSON.parse(JSON.stringify(want));
-      for (const e of edits) setDeep(want, e.steps, e.value);
+      change(want);
     }
     if (canon(want) !== canon(d.manifest.data)) {
       return i === candidate.documentIndex ? "The edit changed more than the intended fields." : "The edit changed another document.";
@@ -29157,6 +29573,14 @@ function finish(source, text2, rules, original, applied, skipped) {
     sourceHash: fingerprint(source),
     skipped,
     withoutFix: original.matches.filter((m) => m.match.rule.autofix === void 0).length,
+    unfixed: original.matches.filter((m) => m.match.rule.autofix === void 0).map((m) => ({
+      ruleId: m.match.rule.id,
+      severity: m.match.finding.severity,
+      message: m.match.finding.message,
+      line: m.match.finding.line,
+      ...m.kind !== void 0 ? { kind: m.kind } : {},
+      ...m.name !== void 0 ? { name: m.name } : {}
+    })),
     notChecked: original.notChecked
   };
   if (text2 === source) {
@@ -29203,7 +29627,7 @@ function finish(source, text2, rules, original, applied, skipped) {
 }
 
 // ../core/src/fix/policy.ts
-var import_yaml4 = __toESM(require_dist(), 1);
+var import_yaml5 = __toESM(require_dist(), 1);
 var FixPolicyError = class extends Error {
   constructor(message) {
     super(message);
@@ -29211,14 +29635,14 @@ var FixPolicyError = class extends Error {
   }
 };
 function parseFixPolicy(text2, origin = "fix policy") {
-  const doc = (0, import_yaml4.parseDocument)(text2);
+  const doc = (0, import_yaml5.parseDocument)(text2);
   if (doc.errors.length > 0) {
     throw new FixPolicyError(
       `${origin}: ${doc.errors[0]?.message.split("\n")[0] ?? "invalid YAML"}`
     );
   }
   if (doc.contents === null) return { params: {} };
-  if (!(0, import_yaml4.isMap)(doc.contents)) throw new FixPolicyError(`${origin}: expected a mapping.`);
+  if (!(0, import_yaml5.isMap)(doc.contents)) throw new FixPolicyError(`${origin}: expected a mapping.`);
   const data = doc.toJS();
   for (const key of Object.keys(data)) {
     if (key !== "params") throw new FixPolicyError(`${origin}: unknown key "${key}".`);
@@ -29257,17 +29681,17 @@ function stripServerFields(data) {
 var same2 = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 function diffData(before, after) {
   const out = [];
-  walk2(before, after, "", "", [], out);
+  walk3(before, after, "", "", [], out);
   return out;
 }
 var join2 = (prefix, key) => prefix === "" ? key : `${prefix}.${key}`;
-function walk2(before, after, oldPath, newPath, within, out) {
+function walk3(before, after, oldPath, newPath, within, out) {
   if (isObject(before) && isObject(after)) {
     for (const key of Object.keys(after)) {
       if (!(key in before)) {
         out.push({ type: "added", path: join2(newPath, key), after: after[key], within });
       } else {
-        walk2(before[key], after[key], join2(oldPath, key), join2(newPath, key), within, out);
+        walk3(before[key], after[key], join2(oldPath, key), join2(newPath, key), within, out);
       }
     }
     for (const key of Object.keys(before)) {
@@ -29289,7 +29713,7 @@ function walk2(before, after, oldPath, newPath, within, out) {
         if (j === void 0) {
           out.push({ type: "added", path: `${newPath}[${i}]`, after: item, within: itemWithin });
         } else {
-          walk2(before[j], item, `${oldPath}[${j}]`, `${newPath}[${i}]`, itemWithin, out);
+          walk3(before[j], item, `${oldPath}[${j}]`, `${newPath}[${i}]`, itemWithin, out);
         }
       });
       before.forEach((item, j) => {
@@ -29312,7 +29736,7 @@ function walk2(before, after, oldPath, newPath, within, out) {
         } else if (i >= after.length) {
           out.push({ type: "removed", path: `${oldPath}[${i}]`, before: before[i], within });
         } else {
-          walk2(before[i], after[i], `${oldPath}[${i}]`, `${newPath}[${i}]`, within, out);
+          walk3(before[i], after[i], `${oldPath}[${i}]`, `${newPath}[${i}]`, within, out);
         }
       }
       return;
@@ -29336,7 +29760,7 @@ function lastKey(path6) {
 }
 
 // ../core/src/diff/effects.ts
-function show(value) {
+function show2(value) {
   if (value === void 0) return "(not set)";
   if (value === null) return "null";
   if (Array.isArray(value)) {
@@ -29394,7 +29818,7 @@ function metadataEffect(change, ctx) {
     return "Annotations do not change how Kubernetes runs the object, but tools that read this annotation may react.";
   }
   if (rel === "apiVersion") {
-    return `The same object is described with a different API version (${show(change.before)} to ${show(change.after)}). Check that the new version still supports every field you use.`;
+    return `The same object is described with a different API version (${show2(change.before)} to ${show2(change.after)}). Check that the new version still supports every field you use.`;
   }
   return void 0;
 }
@@ -29435,8 +29859,8 @@ function deploymentEffect(change, ctx) {
 function serviceEffect(change, ctx) {
   const { rel } = ctx;
   if (rel === "spec.type") {
-    const to = show(change.after ?? "ClusterIP");
-    const from = show(change.before ?? "ClusterIP");
+    const to = show2(change.after ?? "ClusterIP");
+    const from = show2(change.before ?? "ClusterIP");
     const what = {
       ClusterIP: "It becomes reachable only from inside the cluster.",
       NodePort: "It also opens a port on every node of the cluster.",
@@ -29452,13 +29876,13 @@ function serviceEffect(change, ctx) {
     return "Kubernetes does not allow changing the cluster IP of an existing Service. Applying this will be rejected.";
   }
   if (rel === "spec.ports[].port") {
-    return `Clients must now connect on port ${show(change.after)}. The old port ${show(change.before)} stops working.`;
+    return `Clients must now connect on port ${show2(change.after)}. The old port ${show2(change.before)} stops working.`;
   }
   if (rel === "spec.ports[].targetPort") {
-    return `Traffic is now sent to port ${show(change.after)} on the Pods. Make sure the application listens there.`;
+    return `Traffic is now sent to port ${show2(change.after)} on the Pods. Make sure the application listens there.`;
   }
   if (rel === "spec.ports[].nodePort") {
-    return `The port opened on every node changes to ${show(change.after)}. Anything using the old node port stops working.`;
+    return `The port opened on every node changes to ${show2(change.after)}. Anything using the old node port stops working.`;
   }
   if (rel === "spec.ports[]") {
     return change.type === "added" ? "The Service starts listening on an additional port." : "The Service stops listening on this port. Clients using it will fail.";
@@ -29488,7 +29912,7 @@ function podEffect(change, ctx) {
     return `Changes which nodes the Pod may run on. A Pod that fits no node stays Pending.`;
   }
   if (rel === "serviceAccountName") {
-    return `The Pod runs as a different ServiceAccount (${show(change.before)} to ${show(change.after)}), so its permissions on the Kubernetes API change.`;
+    return `The Pod runs as a different ServiceAccount (${show2(change.before)} to ${show2(change.after)}), so its permissions on the Kubernetes API change.`;
   }
   if (/^host(Network|PID|IPC)$/.test(rel)) {
     return change.after === true ? `The Pod now shares the node's ${rel.slice(4)} namespace, which weakens isolation.` : `The Pod stops sharing the node's ${rel.slice(4)} namespace.`;
@@ -29509,23 +29933,23 @@ function containerEffect(change, ctx) {
   const restart = ctx.kind === "Pod" ? " The container restarts." : "";
   const name = ctx.item ?? "";
   if (rel === "image") {
-    const after = show(change.after);
+    const after = show2(change.after);
     const unpinned = !/@/.test(after) && (!/:[^/]+$/.test(after) || after.endsWith(":latest"));
     const warn = unpinned ? " Warning: this image has no fixed version, so it can change without any change to the manifest." : "";
     if (change.type === "changed") {
-      return `${cap(c)} will run ${after} instead of ${show(change.before)}.${restart}${warn}`;
+      return `${cap(c)} will run ${after} instead of ${show2(change.before)}.${restart}${warn}`;
     }
     return `${cap(c)} will run ${after}.${restart}${warn}`;
   }
   if (rel.startsWith("resources.requests")) {
     const what = rel.endsWith(".cpu") ? "CPU" : rel.endsWith(".memory") ? "memory" : "resources";
-    return `The scheduler reserves ${show(change.after)} of ${what} for ${c} (was ${show(change.before)}). New Pods need a node with that much free, or they stay Pending.`;
+    return `The scheduler reserves ${show2(change.after)} of ${what} for ${c} (was ${show2(change.before)}). New Pods need a node with that much free, or they stay Pending.`;
   }
   if (rel === "resources.limits.memory") {
-    return change.type === "removed" ? `${cap(c)} no longer has a memory cap and can use all the memory on its node.` : `${cap(c)} may use at most ${show(change.after)} of memory (was ${show(change.before)}). Above that it is killed (OOMKilled) and restarted.`;
+    return change.type === "removed" ? `${cap(c)} no longer has a memory cap and can use all the memory on its node.` : `${cap(c)} may use at most ${show2(change.after)} of memory (was ${show2(change.before)}). Above that it is killed (OOMKilled) and restarted.`;
   }
   if (rel === "resources.limits.cpu") {
-    return change.type === "removed" ? `${cap(c)} is no longer slowed down when it uses a lot of CPU.` : `${cap(c)} is slowed down (throttled) above ${show(change.after)} of CPU (was ${show(change.before)}).`;
+    return change.type === "removed" ? `${cap(c)} is no longer slowed down when it uses a lot of CPU.` : `${cap(c)} is slowed down (throttled) above ${show2(change.after)} of CPU (was ${show2(change.before)}).`;
   }
   if (rel.startsWith("resources")) {
     return `Changes the CPU and memory reserved for or allowed to ${c}.${restart}`;
@@ -29534,7 +29958,7 @@ function containerEffect(change, ctx) {
     return change.type === "added" ? `Adds environment variable ${name} to ${c}.${restart}` : `Removes environment variable ${name} from ${c}.${restart}`;
   }
   if (rel.startsWith("env[]")) {
-    return `Environment variable ${name} in ${c} changes from ${show(change.before)} to ${show(change.after)}. Applications read these when they start.${restart}`;
+    return `Environment variable ${name} in ${c} changes from ${show2(change.before)} to ${show2(change.after)}. Applications read these when they start.${restart}`;
   }
   if (rel === "command" || rel === "args") {
     return `Changes the program or arguments that start ${c}.${restart}`;
@@ -31874,7 +32298,7 @@ function distance2(a, b) {
 // src/config.ts
 var import_node_fs = require("node:fs");
 var import_node_path = require("node:path");
-var import_yaml5 = __toESM(require_dist());
+var import_yaml6 = __toESM(require_dist());
 
 // src/settings.ts
 var DEFAULTS = {
@@ -31892,6 +32316,7 @@ var DEFAULTS = {
   mode: "enforce",
   dryRun: false,
   rules: [],
+  crds: [],
   disableRules: [],
   severityOverrides: {},
   ignore: [],
@@ -31929,6 +32354,7 @@ var FIELDS = {
   mode: { name: "mode", parse: (v, n, p) => asEnum(v, ["enforce", "report"], n, p) },
   dryRun: { name: "dry-run", parse: (v, n, p) => asBool(v, n, p) },
   rules: { name: "rules", parse: (v, n, p) => asList(v, n, p, false) },
+  crds: { name: "crds", parse: (v, n, p) => asList(v, n, p, false) },
   disableRules: { name: "disable-rules", parse: (v, n, p) => asList(v, n, p, true) },
   severityOverrides: { name: "severity-overrides", parse: parseSeverityOverrides },
   ignore: { name: "ignore", parse: parseIgnore },
@@ -31998,8 +32424,8 @@ function parseIgnore(value, name, p) {
     const e = entry;
     for (const key of Object.keys(e)) {
       if (key !== "path" && key !== "rules" && key !== "rule") {
-        const hint = suggest(key, ["path", "rules"]);
-        p.add(`${at}: unknown key "${key}"${hint ? ` (did you mean "${hint}"?)` : ""}.`);
+        const hint2 = suggest(key, ["path", "rules"]);
+        p.add(`${at}: unknown key "${key}"${hint2 ? ` (did you mean "${hint2}"?)` : ""}.`);
       }
     }
     const item = {};
@@ -32045,8 +32471,8 @@ function parseConfig(data, origin, p) {
   const values = data;
   for (const key of Object.keys(values)) {
     if (!CONFIG_NAMES.includes(key)) {
-      const hint = suggest(key, CONFIG_NAMES);
-      p.add(`${origin}: unknown setting "${key}"${hint ? ` (did you mean "${hint}"?)` : ""}.`);
+      const hint2 = suggest(key, CONFIG_NAMES);
+      p.add(`${origin}: unknown setting "${key}"${hint2 ? ` (did you mean "${hint2}"?)` : ""}.`);
     }
   }
   if (values.version !== void 0 && values.version !== 1) {
@@ -32056,7 +32482,7 @@ function parseConfig(data, origin, p) {
   }
   return readLayer(values, false, p);
 }
-var UNION_KEYS = ["rules", "disableRules", "ignore", "severityOverrides"];
+var UNION_KEYS = ["rules", "crds", "disableRules", "ignore", "severityOverrides"];
 function resolveSettings(config, inputs) {
   const settings = { ...DEFAULTS };
   const sources = {};
@@ -32109,9 +32535,16 @@ function validateSettings(s) {
       );
     }
   }
-  for (const rule of s.rules) {
-    if (unsafePath(rule))
-      problems.push(`rules: "${rule}" must be a relative path inside the repository (no "..").`);
+  for (const [name, list] of [
+    ["rules", s.rules],
+    ["crds", s.crds]
+  ]) {
+    for (const path6 of list) {
+      if (unsafePath(path6))
+        problems.push(
+          `${name}: "${path6}" must be a relative path inside the repository (no "..").`
+        );
+    }
   }
   if (!LABEL.test(s.label))
     problems.push("label: use up to 64 letters, numbers, spaces and . : / @ + - characters.");
@@ -32158,7 +32591,7 @@ function loadConfig(workspace, file, explicit, p) {
   }
   let data;
   try {
-    data = (0, import_yaml5.parse)((0, import_node_fs.readFileSync)(real, "utf8"));
+    data = (0, import_yaml6.parse)((0, import_node_fs.readFileSync)(real, "utf8"));
   } catch (err) {
     p.add(
       `${file}: not valid YAML. ${err instanceof Error ? err.message.split("\n")[0] : String(err)}`
@@ -33616,6 +34049,7 @@ function warnIfUntrusted(s, configPath) {
   const sources = [
     configPath ? `the config file (${configPath})` : "",
     s.rules.length > 0 ? "custom rules" : "",
+    s.crds.length > 0 ? "custom resource definitions" : "",
     s.fixPolicy !== "" ? "the fix policy" : ""
   ].filter(Boolean);
   if (sources.length === 0) return;
@@ -33636,23 +34070,29 @@ function logConfiguration(s, configPath) {
 function loadRules(workspace, s) {
   const rules = loadBundledRules();
   const root = (0, import_node_fs3.realpathSync)(workspace);
-  for (const path6 of s.rules) {
-    const abs = (0, import_node_path3.join)(workspace, path6);
-    let real;
-    try {
-      real = (0, import_node_fs3.realpathSync)(abs);
-    } catch {
-      throw new ConfigError([`rules: "${path6}" does not exist.`]);
-    }
-    if (real !== root && !real.startsWith(root + import_node_path3.sep))
-      throw new ConfigError([`rules: "${path6}" points outside the repository.`]);
-    const files = (0, import_node_fs3.statSync)(real).isDirectory() ? (0, import_node_fs3.readdirSync)(real).filter((f) => /\.ya?ml$/.test(f)).sort().map((f) => (0, import_node_path3.join)(real, f)) : [real];
-    for (const file of files) {
+  const sources = [
+    ["rules", s.rules, parseRules],
+    ["crds", s.crds, parseCrds]
+  ];
+  for (const [setting, paths, parse2] of sources) {
+    for (const path6 of paths) {
+      const abs = (0, import_node_path3.join)(workspace, path6);
+      let real;
       try {
-        rules.push(...parseRules((0, import_node_fs3.readFileSync)(file, "utf8"), file.slice(root.length + 1)));
-      } catch (err) {
-        if (err instanceof RuleError) throw new ConfigError([err.message]);
-        throw err;
+        real = (0, import_node_fs3.realpathSync)(abs);
+      } catch {
+        throw new ConfigError([`${setting}: "${path6}" does not exist.`]);
+      }
+      if (real !== root && !real.startsWith(root + import_node_path3.sep))
+        throw new ConfigError([`${setting}: "${path6}" points outside the repository.`]);
+      const files = (0, import_node_fs3.statSync)(real).isDirectory() ? (0, import_node_fs3.readdirSync)(real).filter((f) => /\.ya?ml$/.test(f)).sort().map((f) => (0, import_node_path3.join)(real, f)) : [real];
+      for (const file of files) {
+        try {
+          rules.push(...parse2((0, import_node_fs3.readFileSync)(file, "utf8"), file.slice(root.length + 1)));
+        } catch (err) {
+          if (err instanceof RuleError) throw new ConfigError([err.message]);
+          throw err;
+        }
       }
     }
   }

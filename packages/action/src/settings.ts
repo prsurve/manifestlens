@@ -25,6 +25,7 @@ export const DEFAULTS: Settings = {
   mode: 'enforce',
   dryRun: false,
   rules: [],
+  crds: [],
   disableRules: [],
   severityOverrides: {},
   ignore: [],
@@ -76,6 +77,7 @@ const FIELDS: Fields = {
   mode: { name: 'mode', parse: (v, n, p) => asEnum(v, ['enforce', 'report'] as const, n, p) },
   dryRun: { name: 'dry-run', parse: (v, n, p) => asBool(v, n, p) },
   rules: { name: 'rules', parse: (v, n, p) => asList(v, n, p, false) },
+  crds: { name: 'crds', parse: (v, n, p) => asList(v, n, p, false) },
   disableRules: { name: 'disable-rules', parse: (v, n, p) => asList(v, n, p, true) },
   severityOverrides: { name: 'severity-overrides', parse: parseSeverityOverrides },
   ignore: { name: 'ignore', parse: parseIgnore },
@@ -218,7 +220,7 @@ export function parseConfig(data: unknown, origin: string, p: Problems): Layer {
   return readLayer(values, false, p);
 }
 
-const UNION_KEYS: SettingKey[] = ['rules', 'disableRules', 'ignore', 'severityOverrides'];
+const UNION_KEYS: SettingKey[] = ['rules', 'crds', 'disableRules', 'ignore', 'severityOverrides'];
 
 /**
  * Combine the levels: defaults, then the config file, then workflow inputs. A setting given at a
@@ -296,9 +298,16 @@ export function validateSettings(s: Settings): string[] {
       );
     }
   }
-  for (const rule of s.rules) {
-    if (unsafePath(rule))
-      problems.push(`rules: "${rule}" must be a relative path inside the repository (no "..").`);
+  for (const [name, list] of [
+    ['rules', s.rules],
+    ['crds', s.crds],
+  ] as const) {
+    for (const path of list) {
+      if (unsafePath(path))
+        problems.push(
+          `${name}: "${path}" must be a relative path inside the repository (no "..").`,
+        );
+    }
   }
   if (!LABEL.test(s.label))
     problems.push('label: use up to 64 letters, numbers, spaces and . : / @ + - characters.');
